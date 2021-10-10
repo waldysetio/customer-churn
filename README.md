@@ -1,2 +1,3 @@
 # Customer Churn Analysis
 A company supplies gas and electricity utility to corporate, SME, and residential customers. Driven by power-liberalization of the energy market, the company undergoes a significant churn mostly in its SME segment. This churn is hypothesized to be caused by customer price sensitivity. The company proposes to offer the customers at high propensity to churn a 20% discount and wonders whether or not this is going to work.
+This project aims to analyze the hypothesis and try to understand whether the proposed 20% discount will be effective. The data used in this project are obtained from Boston Consulting Group (BCG GAMMA).
