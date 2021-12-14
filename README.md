@@ -3642,7 +3642,7 @@ plot_stacked_bars(churn_percentage.transpose(), "Churning status", (5,5), legend
 ```
 
 
-![png](output_39_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_39_0.png)
 
 
 9.9% of the customers have churned.
@@ -3678,7 +3678,7 @@ plt.show()
 ```
 
 
-![png](output_44_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_44_0.png)
 
 
 The bar chart above shows that churn is not specifically related to any SME category in particular.
