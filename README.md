@@ -7,7 +7,7 @@ Author: Waldy Setiono (waldysetiono@gmail.com)
 
 # Exploratory Data Analysis
 
-## 1. Importing Packages
+## Importing Packages
 
 
 ```python
@@ -21,7 +21,7 @@ import datetime
 sns.set(color_codes=True)
 ```
 
-## 2. Loading Data
+## Loading Data
 
 **Data path**
 
@@ -1174,7 +1174,7 @@ train
 
 
 
-## 3. Statistics
+## Statistics
 
 Data types of the train data:
 
@@ -3358,7 +3358,7 @@ pd.DataFrame({"Missing values (%)": history_data.isnull().sum()/len(history_data
 
 
 
-## 4. Data Visualization
+## Data Visualization
 
 **Churn Rate**
 
@@ -3972,7 +3972,7 @@ plot_distribution(power, "pow_max", axs)
 ![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_83_0.png)
 
 
-## 5. Data Cleaning
+## Data Cleaning
 
 **Missing data**
 
@@ -4073,7 +4073,7 @@ train[train.duplicated()]
 
 
 
-## 6. Formatting data
+## Formatting data
 
 **Missing dates**
 
@@ -4576,7 +4576,7 @@ history_data.loc[history_data["price_p2_fix"] < 0,"price_p2_fix"] = history_data
 history_data.loc[history_data["price_p3_fix"] < 0,"price_p3_fix"] = history_data["price_p3_fix"].median()
 ```
 
-## 7. Saving data to csv
+## Saving data to csv
 
 
 ```python
