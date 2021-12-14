@@ -1,7 +1,7 @@
 # Customer Churn Prediction
 Author: Waldy Setiono (waldysetiono@gmail.com)
 
-**Introduction**: An energy company that has been serving corporate, SME, and residential customers is currently undergoing a significant churn mostly in its SME segment due to recent change in regulation that liberalizes the energy market and price sensitivity. This project aims to analyze customer history and make predictive model of churn propensity to help the company deal with this issue. 
+**Introduction**: An energy company that has been serving corporate, SME, and residential customers is currently undergoing a significant churn mostly in its SME segment due to recent change in regulation that liberalizes the energy market. This project aims to analyze customer history and make predictive model of churn propensity to help the company deal with this issue. 
 
 **Data**: The data used in this project are obtained from Boston Consulting Group (BCG GAMMA).
 
@@ -3813,7 +3813,7 @@ plot_stacked_bars(channel_churn, "Sales Channel", rot_=30)
 ```
 
 
-![png](output_55_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_55_0.png)
 
 
 
@@ -3928,7 +3928,7 @@ plot_distribution(consumption, "imp_cons", axs[3])
 ```
 
 
-![png](output_60_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_60_0.png)
 
 
 
@@ -3960,7 +3960,7 @@ plt.show()
     
 
 
-![png](output_61_1.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_61_1.png)
 
 
 The consumption data are highly skewed to the right. The values on the higher and the lower end of the distribution are likely to be outliers. We will do data cleaning to deal with this issue.
@@ -4019,7 +4019,7 @@ plot_dates(dates, "date_activ", fontsize_=8)
 ```
 
 
-![png](output_67_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_67_0.png)
 
 
 
@@ -4028,7 +4028,7 @@ plot_dates(dates, "date_end")
 ```
 
 
-![png](output_68_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_68_0.png)
 
 
 
@@ -4037,7 +4037,7 @@ plot_dates(dates, "date_modif_prod", fontsize_=8)
 ```
 
 
-![png](output_69_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_69_0.png)
 
 
 
@@ -4046,7 +4046,7 @@ plot_dates(dates, "date_renewal")
 ```
 
 
-![png](output_70_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_70_0.png)
 
 
 Visualizing data does not provide us with any useful insight. Those charts are used to see the distribution of churned companies according to the date.
@@ -4080,7 +4080,7 @@ plot_distribution(train, "forecast_price_pow_p1", axs[10])
 ```
 
 
-![png](output_74_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_74_0.png)
 
 
 As we can see, a lot of variables are skewed to the right. We will also address this skewness later.
@@ -4100,7 +4100,7 @@ plot_stacked_bars(contract_percentage, "Contract type (with gas)")
 ```
 
 
-![png](output_77_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_77_0.png)
 
 
 **Margins**
@@ -4133,7 +4133,7 @@ plt.show()
     
 
 
-![png](output_80_1.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_80_1.png)
 
 
 Outliers are present here too.
@@ -4149,7 +4149,7 @@ plot_distribution(power, "pow_max", axs)
 ```
 
 
-![png](output_83_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_83_0.png)
 
 
 ## 5. Data Cleaning
@@ -4168,7 +4168,7 @@ plt.show()
 ```
 
 
-![png](output_87_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_87_0.png)
 
 
 We will remove variables with more than 60% of the values missing for simplicity reason but we might reuse these variables later on if our model is not good enough.
@@ -4295,7 +4295,7 @@ plt.show()
 ```
 
 
-![png](output_99_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_99_0.png)
 
 
 We will also use median to replace the missing values here.
@@ -4524,7 +4524,7 @@ plt.show()
     
 
 
-![png](output_110_1.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/output_110_1.png)
 
 
 **Negative data**
