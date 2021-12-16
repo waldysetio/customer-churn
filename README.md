@@ -4587,3 +4587,4531 @@ train.to_csv(r'clean_train_data.csv', index = False, header=True)
 ```python
 history_data.to_csv(r'clean_history_data.csv', index = False, header=True)
 ```
+# Feature Engineering
+
+## 1. Loading data
+
+Let's load the data that have previously been processed and cleaned.
+
+
+```python
+train = pd.read_csv('https://raw.githubusercontent.com/waldysetio/customer-churn-analysis/main/clean-data/clean_train_data.csv')
+history = pd.read_csv('https://raw.githubusercontent.com/waldysetio/customer-churn-analysis/main/clean-data/clean_history_data.csv')
+```
+
+
+```python
+train
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>activity_new</th>
+      <th>channel_sales</th>
+      <th>cons_12m</th>
+      <th>cons_gas_12m</th>
+      <th>cons_last_month</th>
+      <th>date_activ</th>
+      <th>date_end</th>
+      <th>date_modif_prod</th>
+      <th>date_renewal</th>
+      <th>forecast_cons_12m</th>
+      <th>forecast_cons_year</th>
+      <th>forecast_discount_energy</th>
+      <th>forecast_meter_rent_12m</th>
+      <th>forecast_price_energy_p1</th>
+      <th>forecast_price_energy_p2</th>
+      <th>forecast_price_pow_p1</th>
+      <th>has_gas</th>
+      <th>imp_cons</th>
+      <th>margin_gross_pow_ele</th>
+      <th>margin_net_pow_ele</th>
+      <th>nb_prod_act</th>
+      <th>net_margin</th>
+      <th>num_years_antig</th>
+      <th>origin_up</th>
+      <th>pow_max</th>
+      <th>churn</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>48ada52261e7cf58715202705a0451c9</td>
+      <td>esoiiifxdlbkcsluxmfuacbdckommixw</td>
+      <td>lmkebamcaaclubfxadlmueccxoimlema</td>
+      <td>309275</td>
+      <td>0</td>
+      <td>10025</td>
+      <td>2012-11-07</td>
+      <td>2016-11-06</td>
+      <td>2012-11-07</td>
+      <td>2015-11-09</td>
+      <td>26520.30</td>
+      <td>10025</td>
+      <td>0.0</td>
+      <td>359.29</td>
+      <td>0.095919</td>
+      <td>0.088347</td>
+      <td>58.995952</td>
+      <td>f</td>
+      <td>831.80</td>
+      <td>-41.76</td>
+      <td>-41.76</td>
+      <td>1</td>
+      <td>1732.36</td>
+      <td>3</td>
+      <td>ldkssxwpmemidmecebumciepifcamkci</td>
+      <td>180.000</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>24011ae4ebbe3035111d65fa7c15bc57</td>
+      <td>NaN</td>
+      <td>foosdfpfkusacimwkcsosbicdxkicaua</td>
+      <td>0</td>
+      <td>54946</td>
+      <td>0</td>
+      <td>2013-06-15</td>
+      <td>2016-06-15</td>
+      <td>2015-11-01</td>
+      <td>2015-06-23</td>
+      <td>0.00</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>1.78</td>
+      <td>0.114481</td>
+      <td>0.098142</td>
+      <td>40.606701</td>
+      <td>t</td>
+      <td>0.00</td>
+      <td>25.44</td>
+      <td>25.44</td>
+      <td>2</td>
+      <td>678.99</td>
+      <td>3</td>
+      <td>lxidpiddsbxsbosboudacockeimpuepw</td>
+      <td>43.648</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>d29c2c54acc38ff3c0614d0a653813dd</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4660</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2009-08-21</td>
+      <td>2016-08-30</td>
+      <td>2009-08-21</td>
+      <td>2015-08-31</td>
+      <td>189.95</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>16.27</td>
+      <td>0.145711</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>f</td>
+      <td>0.00</td>
+      <td>16.38</td>
+      <td>16.38</td>
+      <td>1</td>
+      <td>18.89</td>
+      <td>6</td>
+      <td>kamkkxfxxuwbdslkwifmmcsiusiuosws</td>
+      <td>13.800</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>764c75f661154dac3a6c254cd082ea7d</td>
+      <td>NaN</td>
+      <td>foosdfpfkusacimwkcsosbicdxkicaua</td>
+      <td>544</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2010-04-16</td>
+      <td>2016-04-16</td>
+      <td>2010-04-16</td>
+      <td>2015-04-17</td>
+      <td>47.96</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>38.72</td>
+      <td>0.165794</td>
+      <td>0.087899</td>
+      <td>44.311378</td>
+      <td>f</td>
+      <td>0.00</td>
+      <td>28.60</td>
+      <td>28.60</td>
+      <td>1</td>
+      <td>6.60</td>
+      <td>6</td>
+      <td>kamkkxfxxuwbdslkwifmmcsiusiuosws</td>
+      <td>13.856</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>bba03439a292a1e166f80264c16191cb</td>
+      <td>NaN</td>
+      <td>lmkebamcaaclubfxadlmueccxoimlema</td>
+      <td>1584</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2010-03-30</td>
+      <td>2016-03-30</td>
+      <td>2010-03-30</td>
+      <td>2015-03-31</td>
+      <td>240.04</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>19.83</td>
+      <td>0.146694</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>f</td>
+      <td>0.00</td>
+      <td>30.22</td>
+      <td>30.22</td>
+      <td>1</td>
+      <td>25.46</td>
+      <td>6</td>
+      <td>kamkkxfxxuwbdslkwifmmcsiusiuosws</td>
+      <td>13.200</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>16091</th>
+      <td>18463073fb097fc0ac5d3e040f356987</td>
+      <td>NaN</td>
+      <td>foosdfpfkusacimwkcsosbicdxkicaua</td>
+      <td>32270</td>
+      <td>47940</td>
+      <td>0</td>
+      <td>2012-05-24</td>
+      <td>2016-05-08</td>
+      <td>2015-05-08</td>
+      <td>2014-05-26</td>
+      <td>4648.01</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>18.57</td>
+      <td>0.138305</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>t</td>
+      <td>0.00</td>
+      <td>27.88</td>
+      <td>27.88</td>
+      <td>2</td>
+      <td>381.77</td>
+      <td>4</td>
+      <td>lxidpiddsbxsbosboudacockeimpuepw</td>
+      <td>15.000</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16092</th>
+      <td>d0a6f71671571ed83b2645d23af6de00</td>
+      <td>NaN</td>
+      <td>foosdfpfkusacimwkcsosbicdxkicaua</td>
+      <td>7223</td>
+      <td>0</td>
+      <td>181</td>
+      <td>2012-08-27</td>
+      <td>2016-08-27</td>
+      <td>2012-08-27</td>
+      <td>2015-08-28</td>
+      <td>631.69</td>
+      <td>181</td>
+      <td>0.0</td>
+      <td>144.03</td>
+      <td>0.100167</td>
+      <td>0.091892</td>
+      <td>58.995952</td>
+      <td>f</td>
+      <td>15.94</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>90.34</td>
+      <td>3</td>
+      <td>lxidpiddsbxsbosboudacockeimpuepw</td>
+      <td>6.000</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>16093</th>
+      <td>10e6828ddd62cbcf687cb74928c4c2d2</td>
+      <td>NaN</td>
+      <td>foosdfpfkusacimwkcsosbicdxkicaua</td>
+      <td>1844</td>
+      <td>0</td>
+      <td>179</td>
+      <td>2012-02-08</td>
+      <td>2016-02-07</td>
+      <td>2012-02-08</td>
+      <td>2015-02-09</td>
+      <td>190.39</td>
+      <td>179</td>
+      <td>0.0</td>
+      <td>129.60</td>
+      <td>0.116900</td>
+      <td>0.100015</td>
+      <td>40.606701</td>
+      <td>f</td>
+      <td>18.05</td>
+      <td>39.84</td>
+      <td>39.84</td>
+      <td>1</td>
+      <td>20.38</td>
+      <td>4</td>
+      <td>lxidpiddsbxsbosboudacockeimpuepw</td>
+      <td>15.935</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>16094</th>
+      <td>1cf20fd6206d7678d5bcafd28c53b4db</td>
+      <td>NaN</td>
+      <td>foosdfpfkusacimwkcsosbicdxkicaua</td>
+      <td>131</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2012-08-30</td>
+      <td>2016-08-30</td>
+      <td>2012-08-30</td>
+      <td>2015-08-31</td>
+      <td>19.34</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>7.18</td>
+      <td>0.145711</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>f</td>
+      <td>0.00</td>
+      <td>13.08</td>
+      <td>13.08</td>
+      <td>1</td>
+      <td>0.96</td>
+      <td>3</td>
+      <td>lxidpiddsbxsbosboudacockeimpuepw</td>
+      <td>11.000</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16095</th>
+      <td>563dde550fd624d7352f3de77c0cdfcd</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>8730</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2009-12-18</td>
+      <td>2016-12-17</td>
+      <td>2009-12-18</td>
+      <td>2015-12-21</td>
+      <td>762.41</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>1.07</td>
+      <td>0.167086</td>
+      <td>0.088454</td>
+      <td>45.311378</td>
+      <td>f</td>
+      <td>0.00</td>
+      <td>11.84</td>
+      <td>11.84</td>
+      <td>1</td>
+      <td>96.34</td>
+      <td>6</td>
+      <td>ldkssxwpmemidmecebumciepifcamkci</td>
+      <td>10.392</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>16096 rows × 27 columns</p>
+</div>
+
+
+
+
+```python
+history
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>price_date</th>
+      <th>price_p1_var</th>
+      <th>price_p2_var</th>
+      <th>price_p3_var</th>
+      <th>price_p1_fix</th>
+      <th>price_p2_fix</th>
+      <th>price_p3_fix</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-01-01</td>
+      <td>0.151367</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-02-01</td>
+      <td>0.151367</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-03-01</td>
+      <td>0.151367</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-04-01</td>
+      <td>0.149626</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-05-01</td>
+      <td>0.149626</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>192997</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-08-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+    <tr>
+      <th>192998</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-09-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+    <tr>
+      <th>192999</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-10-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+    <tr>
+      <th>193000</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-11-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+    <tr>
+      <th>193001</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-12-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+  </tbody>
+</table>
+<p>193002 rows × 8 columns</p>
+</div>
+
+
+
+## 2. Feature Engineering
+
+We will create new features using the average of the year, the last six month, and the last three month to our model.
+
+
+```python
+mean_year = history.groupby(["id"]).mean().reset_index()
+```
+
+
+```python
+mean_6m = history[history["price_date"] > "2015-06-01"].groupby(["id"]).mean().reset_index()
+```
+
+
+```python
+mean_3m = history[history["price_date"] > "2015-10-01"].groupby(["id"]).mean().reset_index()
+```
+
+Let's combine each of them in a single dataframe.
+
+
+```python
+mean_year = mean_year.rename(index=str, columns={"price_p1_var": "mean_year_price_p1_var",
+                                                 "price_p2_var": "mean_year_price_p2_var",
+                                                 "price_p3_var": "mean_year_price_p3_var",
+                                                 "price_p1_fix": "mean_year_price_p1_fix",
+                                                 "price_p2_fix": "mean_year_price_p2_fix",
+                                                 "price_p3_fix": "mean_year_price_p3_fix",})
+mean_year["mean_year_price_p1"] = mean_year["mean_year_price_p1_var"] + mean_year["mean_year_price_p1_fix"]
+mean_year["mean_year_price_p2"] = mean_year["mean_year_price_p2_var"] + mean_year["mean_year_price_p2_fix"]
+mean_year["mean_year_price_p3"] = mean_year["mean_year_price_p3_var"] + mean_year["mean_year_price_p3_fix"]
+```
+
+
+```python
+mean_6m = mean_6m.rename(index=str, columns={"price_p1_var": "mean_6m_price_p1_var",
+                                             "price_p2_var": "mean_6m_price_p2_var",
+                                             "price_p3_var": "mean_6m_price_p3_var",
+                                             "price_p1_fix": "mean_6m_price_p1_fix",
+                                             "price_p2_fix": "mean_6m_price_p2_fix",
+                                             "price_p3_fix": "mean_6m_price_p3_fix",})
+mean_6m["mean_6m_price_p1"] = mean_6m["mean_6m_price_p1_var"] + mean_6m["mean_6m_price_p1_fix"]
+mean_6m["mean_6m_price_p2"] = mean_6m["mean_6m_price_p2_var"] + mean_6m["mean_6m_price_p2_fix"]
+mean_6m["mean_6m_price_p3"] = mean_6m["mean_6m_price_p3_var"] + mean_6m["mean_6m_price_p3_fix"]
+```
+
+
+```python
+mean_3m = mean_3m.rename(index=str, columns={"price_p1_var": "mean_3m_price_p1_var",
+                                             "price_p2_var": "mean_3m_price_p2_var",
+                                             "price_p3_var": "mean_3m_price_p3_var",
+                                             "price_p1_fix": "mean_3m_price_p1_fix",
+                                             "price_p2_fix": "mean_3m_price_p2_fix",
+                                             "price_p3_fix": "mean_3m_price_p3_fix",})
+mean_3m["mean_3m_price_p1"] = mean_3m["mean_3m_price_p1_var"] + mean_3m["mean_3m_price_p1_fix"]
+mean_3m["mean_3m_price_p2"] = mean_3m["mean_3m_price_p2_var"] + mean_3m["mean_3m_price_p2_fix"]
+mean_3m["mean_3m_price_p3"] = mean_3m["mean_3m_price_p3_var"] + mean_3m["mean_3m_price_p3_fix"]
+```
+
+Since it's not convincing enough that mean_6m and mean_3m can help the predictoin model, we will use only mean_year for now.
+
+
+```python
+# features = pd.merge(mean_year, mean_6m, on="id")
+# features = pd.merge(mean_year, mean_3m, on="id")
+features = mean_year
+```
+
+**Feature engineering**
+
+We are going to define a new variable to know the correlation between the tenure of the customers and the churn rate.
+
+
+```python
+train['date_end'] = pd.to_datetime(train['date_end'])
+train['date_activ'] = pd.to_datetime(train['date_activ'])
+```
+
+
+```python
+train["tenure"] = ((train["date_end"]-train["date_activ"])/ np.timedelta64(1, "Y")).astype(int)
+```
+
+
+```python
+tenure = train[["tenure", "churn", "id"]].groupby(["tenure", "churn"])["id"].count().unstack(level=1)
+tenure_percentage = (tenure.div(tenure.sum(axis=1), axis=0)*100)
+```
+
+
+```python
+tenure.plot(kind="bar",
+            figsize=(18,10),
+            stacked=True,
+            rot=0,
+            title= "Tenure")
+
+plt.legend(["Retention", "Churn"], loc="upper right")
+
+plt.ylabel("No. of companies")
+plt.xlabel("No. of years")
+plt.show()
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_23_0.png)
+
+
+As we can see, churn is significantly lower for companies which joined recently or a long time ago. Higher number of churners are within those with 3 to 7 years of tenure.
+
+We will also transform the dates provided in such a way that we can make more sense out of those.
+
+months_activ : Number of months active until reference date (Jan 2016)
+
+months_to_end : Number of months of the contract left at reference date (Jan 2016)
+
+months_modif_prod : Number of months since last modification at reference date (Jan 2016)
+
+months_renewal : Number of months since last renewal at reference date (Jan 2016)
+
+
+```python
+def convert_months(reference_date, dataframe, column):
+
+    time_delta = REFERENCE_DATE - dataframe[column]
+    months = (time_delta / np.timedelta64(1, "M")).astype(int)
+    return months
+```
+
+
+```python
+REFERENCE_DATE = datetime.datetime(2016,1,1)
+```
+
+
+```python
+train['date_modif_prod'] = pd.to_datetime(train['date_modif_prod'])
+train['date_renewal'] = pd.to_datetime(train['date_renewal'])
+```
+
+
+```python
+train["months_activ"] = convert_months(REFERENCE_DATE, train, "date_activ")
+train["months_to_end"] = -convert_months(REFERENCE_DATE, train, "date_end")
+train["months_modif_prod"] = convert_months(REFERENCE_DATE, train, "date_modif_prod")
+train["months_renewal"] = convert_months(REFERENCE_DATE, train, "date_renewal")
+```
+
+Now let's see if there is some insight.
+
+
+```python
+def plot_churn_by_month(dataframe, column, fontsize_=11):
+
+    temp = dataframe[[column, "churn", "id"]].groupby([column, "churn"])["id"].count().unstack(level=1)
+    temp.plot(kind="bar",
+              figsize=(18,10),
+              stacked=True,
+              rot=0,
+              title= column)
+
+    plt.legend(["Retention", "Churn"], loc="upper right")
+
+    plt.ylabel("No. of companies")
+    plt.xlabel("No. of months")
+
+    plt.xticks(fontsize=fontsize_)
+    plt.show()
+```
+
+
+```python
+plot_churn_by_month(train, "months_activ", 6)
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_36_0.png)
+
+
+
+```python
+plot_churn_by_month(train, "months_to_end")
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_37_0.png)
+
+
+
+```python
+plot_churn_by_month(train, "months_modif_prod", 6)
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_38_0.png)
+
+
+
+```python
+plot_churn_by_month(train, "months_renewal")
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_39_0.png)
+
+
+Remove the date columns
+
+
+```python
+train.drop(columns=["date_activ", "date_end", "date_modif_prod", "date_renewal"],inplace=True)
+```
+
+Now let's do onehot encoding for the colunmn "has_gas"
+
+
+```python
+train["has_gas"]=train["has_gas"].replace(["t", "f"],[1,0])
+```
+
+**Categorical data and dummy variables**
+
+
+
+Categorical data of "channel_sales"
+
+We want to convert each category into a new dummy variable which will have 0 s and 1 s depending whether than entry belongs to that particular category or not.
+
+First, we will replace the NaN values with a string called null_values_channel.
+
+
+```python
+train["channel_sales"] = train["channel_sales"].fillna("null_values_channel")
+```
+
+
+```python
+# Transform to categorical data type
+train["channel_sales"] = train["channel_sales"].astype("category")
+```
+
+
+```python
+pd.DataFrame({"Samples in category": train["channel_sales"].value_counts()})
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Samples in category</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>foosdfpfkusacimwkcsosbicdxkicaua</th>
+      <td>7377</td>
+    </tr>
+    <tr>
+      <th>null_values_channel</th>
+      <td>4218</td>
+    </tr>
+    <tr>
+      <th>lmkebamcaaclubfxadlmueccxoimlema</th>
+      <td>2073</td>
+    </tr>
+    <tr>
+      <th>usilxuppasemubllopkaafesmlibmsdf</th>
+      <td>1444</td>
+    </tr>
+    <tr>
+      <th>ewpakwlliwisiwduibdlfmalxowmwpci</th>
+      <td>966</td>
+    </tr>
+    <tr>
+      <th>sddiedcslfslkckwlfkdpoeeailfpeds</th>
+      <td>12</td>
+    </tr>
+    <tr>
+      <th>epumfxlbckeskwekxbiuasklxalciiuu</th>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>fixdbufsefwooaasfcxdxadsiekoceaa</th>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+We will create 8 different dummy variables . Each variable will become a different column.
+
+
+```python
+#Create dummy variables
+categories_channel = pd.get_dummies(train["channel_sales"], prefix = "channel")
+```
+
+
+```python
+#Rename columns for simplicity
+categories_channel.columns = [col_name[:11] for col_name in categories_channel.columns]
+```
+
+
+```python
+categories_channel
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>channel_epu</th>
+      <th>channel_ewp</th>
+      <th>channel_fix</th>
+      <th>channel_foo</th>
+      <th>channel_lmk</th>
+      <th>channel_nul</th>
+      <th>channel_sdd</th>
+      <th>channel_usi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>16091</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16092</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16093</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16094</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16095</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>16096 rows × 8 columns</p>
+</div>
+
+
+
+Now we will remove the channel_nul to avoid multicollinearity.
+
+
+```python
+categories_channel.drop(columns=["channel_nul"],inplace=True)
+```
+
+Categorical data of "origin_up"
+
+First of all let's replace the Nan values with a string called null_values_origin.
+
+
+```python
+train["origin_up"] = train["origin_up"].fillna("null_values_origin")
+```
+
+Now transform the origin_up column into categorical data type.
+
+
+```python
+train["origin_up"] = train["origin_up"].astype("category")
+```
+
+
+```python
+pd.DataFrame({"Samples in category": train["origin_up"].value_counts()})
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Samples in category</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>lxidpiddsbxsbosboudacockeimpuepw</th>
+      <td>7825</td>
+    </tr>
+    <tr>
+      <th>kamkkxfxxuwbdslkwifmmcsiusiuosws</th>
+      <td>4517</td>
+    </tr>
+    <tr>
+      <th>ldkssxwpmemidmecebumciepifcamkci</th>
+      <td>3664</td>
+    </tr>
+    <tr>
+      <th>null_values_origin</th>
+      <td>87</td>
+    </tr>
+    <tr>
+      <th>usapbepcfoloekilkwsdiboslwaxobdp</th>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>ewxeelcelemmiwuafmddpobolfuxioce</th>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+We will create 6 different dummy variables.
+
+
+```python
+# Create dummy variables
+categories_origin = pd.get_dummies(train["origin_up"], prefix = "origin")
+# Rename columns for simplicity
+categories_origin.columns = [col_name[:10] for col_name in categories_origin.columns]
+```
+
+
+```python
+categories_origin
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>origin_ewx</th>
+      <th>origin_kam</th>
+      <th>origin_ldk</th>
+      <th>origin_lxi</th>
+      <th>origin_nul</th>
+      <th>origin_usa</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>16091</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16092</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16093</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16094</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16095</th>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>16096 rows × 6 columns</p>
+</div>
+
+
+
+Now remove one column to avoid the dummy variable trap.
+
+
+```python
+categories_origin.drop(columns=["origin_nul"],inplace=True)
+```
+
+**Categorical data - Feature engineering**
+
+First, let's replace the Nan values with a string called null_values_activity.
+
+
+```python
+train["activity_new"] = train["activity_new"].fillna("null_values_activity")
+```
+
+
+```python
+categories_activity = pd.DataFrame({"Activity samples":train["activity_new"].value_counts()})
+categories_activity
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Activity samples</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>null_values_activity</th>
+      <td>9545</td>
+    </tr>
+    <tr>
+      <th>apdekpcbwosbxepsfxclislboipuxpop</th>
+      <td>1577</td>
+    </tr>
+    <tr>
+      <th>kkklcdamwfafdcfwofuscwfwadblfmce</th>
+      <td>422</td>
+    </tr>
+    <tr>
+      <th>kwuslieomapmswolewpobpplkaooaaew</th>
+      <td>230</td>
+    </tr>
+    <tr>
+      <th>fmwdwsxillemwbbwelxsampiuwwpcdcb</th>
+      <td>219</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>wcweaxoxmefpfbpfbifcwmfeeubwwkmc</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>kcioolmpmuxpoeuicskiafwcmadeflfc</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>kpkesxdaobicuwwkukxwmdpsbowwbomd</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>ocskiadudoffubcmbomoslkcddxwfsuf</th>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>beplffiwdfsmiuodulsfscelscscbdix</th>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<p>420 rows × 1 columns</p>
+</div>
+
+
+
+As we can see, there are too many categories with very few number of samples. So we will replace any category with less than 75 samples as
+null_values_category.
+
+
+```python
+# Get the categories with less than 75 samples
+to_replace = list(categories_activity[categories_activity["Activity samples"] <= 75].index)
+# Replace them with `null_values_categories`
+train["activity_new"]=train["activity_new"].replace(to_replace,"null_values_activity")
+```
+
+
+```python
+# Create dummy variables
+categories_activity = pd.get_dummies(train["activity_new"], prefix = "activity")
+# Rename columns for simplicity
+categories_activity.columns = [col_name[:12] for col_name in categories_activity.columns]
+```
+
+
+```python
+categories_activity
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>activity_apd</th>
+      <th>activity_ckf</th>
+      <th>activity_clu</th>
+      <th>activity_cwo</th>
+      <th>activity_fmw</th>
+      <th>activity_kkk</th>
+      <th>activity_kwu</th>
+      <th>activity_nul</th>
+      <th>activity_sfi</th>
+      <th>activity_wxe</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>16091</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16092</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16093</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16094</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16095</th>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>16096 rows × 10 columns</p>
+</div>
+
+
+
+Remove one column to avoid the dummy variable trap.
+
+
+```python
+categories_activity.drop(columns=["activity_nul"],inplace=True)
+```
+
+Merge dummy variables to main dataframe.
+
+
+```python
+# Use common index to merge
+train = pd.merge(train, categories_channel, left_index=True, right_index=True)
+train = pd.merge(train, categories_origin, left_index=True, right_index=True)
+train = pd.merge(train, categories_activity, left_index=True, right_index=True)
+```
+
+
+```python
+train.drop(columns=["channel_sales", "origin_up", "activity_new"],inplace=True)
+```
+
+
+```python
+train
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>cons_12m</th>
+      <th>cons_gas_12m</th>
+      <th>cons_last_month</th>
+      <th>forecast_cons_12m</th>
+      <th>forecast_cons_year</th>
+      <th>forecast_discount_energy</th>
+      <th>forecast_meter_rent_12m</th>
+      <th>forecast_price_energy_p1</th>
+      <th>forecast_price_energy_p2</th>
+      <th>forecast_price_pow_p1</th>
+      <th>has_gas</th>
+      <th>imp_cons</th>
+      <th>margin_gross_pow_ele</th>
+      <th>margin_net_pow_ele</th>
+      <th>nb_prod_act</th>
+      <th>net_margin</th>
+      <th>num_years_antig</th>
+      <th>pow_max</th>
+      <th>churn</th>
+      <th>tenure</th>
+      <th>months_activ</th>
+      <th>months_to_end</th>
+      <th>months_modif_prod</th>
+      <th>months_renewal</th>
+      <th>channel_epu</th>
+      <th>channel_ewp</th>
+      <th>channel_fix</th>
+      <th>channel_foo</th>
+      <th>channel_lmk</th>
+      <th>channel_sdd</th>
+      <th>channel_usi</th>
+      <th>origin_ewx</th>
+      <th>origin_kam</th>
+      <th>origin_ldk</th>
+      <th>origin_lxi</th>
+      <th>origin_usa</th>
+      <th>activity_apd</th>
+      <th>activity_ckf</th>
+      <th>activity_clu</th>
+      <th>activity_cwo</th>
+      <th>activity_fmw</th>
+      <th>activity_kkk</th>
+      <th>activity_kwu</th>
+      <th>activity_sfi</th>
+      <th>activity_wxe</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>48ada52261e7cf58715202705a0451c9</td>
+      <td>309275</td>
+      <td>0</td>
+      <td>10025</td>
+      <td>26520.30</td>
+      <td>10025</td>
+      <td>0.0</td>
+      <td>359.29</td>
+      <td>0.095919</td>
+      <td>0.088347</td>
+      <td>58.995952</td>
+      <td>0</td>
+      <td>831.80</td>
+      <td>-41.76</td>
+      <td>-41.76</td>
+      <td>1</td>
+      <td>1732.36</td>
+      <td>3</td>
+      <td>180.000</td>
+      <td>0</td>
+      <td>3</td>
+      <td>37</td>
+      <td>10</td>
+      <td>37</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>24011ae4ebbe3035111d65fa7c15bc57</td>
+      <td>0</td>
+      <td>54946</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>1.78</td>
+      <td>0.114481</td>
+      <td>0.098142</td>
+      <td>40.606701</td>
+      <td>1</td>
+      <td>0.00</td>
+      <td>25.44</td>
+      <td>25.44</td>
+      <td>2</td>
+      <td>678.99</td>
+      <td>3</td>
+      <td>43.648</td>
+      <td>1</td>
+      <td>3</td>
+      <td>30</td>
+      <td>5</td>
+      <td>2</td>
+      <td>6</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>d29c2c54acc38ff3c0614d0a653813dd</td>
+      <td>4660</td>
+      <td>0</td>
+      <td>0</td>
+      <td>189.95</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>16.27</td>
+      <td>0.145711</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>16.38</td>
+      <td>16.38</td>
+      <td>1</td>
+      <td>18.89</td>
+      <td>6</td>
+      <td>13.800</td>
+      <td>0</td>
+      <td>7</td>
+      <td>76</td>
+      <td>7</td>
+      <td>76</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>764c75f661154dac3a6c254cd082ea7d</td>
+      <td>544</td>
+      <td>0</td>
+      <td>0</td>
+      <td>47.96</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>38.72</td>
+      <td>0.165794</td>
+      <td>0.087899</td>
+      <td>44.311378</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>28.60</td>
+      <td>28.60</td>
+      <td>1</td>
+      <td>6.60</td>
+      <td>6</td>
+      <td>13.856</td>
+      <td>0</td>
+      <td>6</td>
+      <td>68</td>
+      <td>3</td>
+      <td>68</td>
+      <td>8</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>bba03439a292a1e166f80264c16191cb</td>
+      <td>1584</td>
+      <td>0</td>
+      <td>0</td>
+      <td>240.04</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>19.83</td>
+      <td>0.146694</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>30.22</td>
+      <td>30.22</td>
+      <td>1</td>
+      <td>25.46</td>
+      <td>6</td>
+      <td>13.200</td>
+      <td>0</td>
+      <td>6</td>
+      <td>69</td>
+      <td>2</td>
+      <td>69</td>
+      <td>9</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>16091</th>
+      <td>18463073fb097fc0ac5d3e040f356987</td>
+      <td>32270</td>
+      <td>47940</td>
+      <td>0</td>
+      <td>4648.01</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>18.57</td>
+      <td>0.138305</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>1</td>
+      <td>0.00</td>
+      <td>27.88</td>
+      <td>27.88</td>
+      <td>2</td>
+      <td>381.77</td>
+      <td>4</td>
+      <td>15.000</td>
+      <td>0</td>
+      <td>3</td>
+      <td>43</td>
+      <td>4</td>
+      <td>7</td>
+      <td>19</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16092</th>
+      <td>d0a6f71671571ed83b2645d23af6de00</td>
+      <td>7223</td>
+      <td>0</td>
+      <td>181</td>
+      <td>631.69</td>
+      <td>181</td>
+      <td>0.0</td>
+      <td>144.03</td>
+      <td>0.100167</td>
+      <td>0.091892</td>
+      <td>58.995952</td>
+      <td>0</td>
+      <td>15.94</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>90.34</td>
+      <td>3</td>
+      <td>6.000</td>
+      <td>1</td>
+      <td>4</td>
+      <td>40</td>
+      <td>7</td>
+      <td>40</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16093</th>
+      <td>10e6828ddd62cbcf687cb74928c4c2d2</td>
+      <td>1844</td>
+      <td>0</td>
+      <td>179</td>
+      <td>190.39</td>
+      <td>179</td>
+      <td>0.0</td>
+      <td>129.60</td>
+      <td>0.116900</td>
+      <td>0.100015</td>
+      <td>40.606701</td>
+      <td>0</td>
+      <td>18.05</td>
+      <td>39.84</td>
+      <td>39.84</td>
+      <td>1</td>
+      <td>20.38</td>
+      <td>4</td>
+      <td>15.935</td>
+      <td>1</td>
+      <td>3</td>
+      <td>46</td>
+      <td>1</td>
+      <td>46</td>
+      <td>10</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16094</th>
+      <td>1cf20fd6206d7678d5bcafd28c53b4db</td>
+      <td>131</td>
+      <td>0</td>
+      <td>0</td>
+      <td>19.34</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>7.18</td>
+      <td>0.145711</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>13.08</td>
+      <td>13.08</td>
+      <td>1</td>
+      <td>0.96</td>
+      <td>3</td>
+      <td>11.000</td>
+      <td>0</td>
+      <td>4</td>
+      <td>40</td>
+      <td>7</td>
+      <td>40</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16095</th>
+      <td>563dde550fd624d7352f3de77c0cdfcd</td>
+      <td>8730</td>
+      <td>0</td>
+      <td>0</td>
+      <td>762.41</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>1.07</td>
+      <td>0.167086</td>
+      <td>0.088454</td>
+      <td>45.311378</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>11.84</td>
+      <td>11.84</td>
+      <td>1</td>
+      <td>96.34</td>
+      <td>6</td>
+      <td>10.392</td>
+      <td>0</td>
+      <td>6</td>
+      <td>72</td>
+      <td>11</td>
+      <td>72</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>16096 rows × 46 columns</p>
+</div>
+
+
+
+**Log transformation**
+
+We know from the previous exploratory data analysis that a lot of the variables we are dealing with are highly skewed to the right and this could make our model perform poorly.
+
+There are several ways to deal with skewness such as square root, cubic root, and log. In this case, we are going to use log transformation which is usually recommended for right skewed data.
+
+
+```python
+train.describe()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cons_12m</th>
+      <th>cons_gas_12m</th>
+      <th>cons_last_month</th>
+      <th>forecast_cons_12m</th>
+      <th>forecast_cons_year</th>
+      <th>forecast_discount_energy</th>
+      <th>forecast_meter_rent_12m</th>
+      <th>forecast_price_energy_p1</th>
+      <th>forecast_price_energy_p2</th>
+      <th>forecast_price_pow_p1</th>
+      <th>has_gas</th>
+      <th>imp_cons</th>
+      <th>margin_gross_pow_ele</th>
+      <th>margin_net_pow_ele</th>
+      <th>nb_prod_act</th>
+      <th>net_margin</th>
+      <th>num_years_antig</th>
+      <th>pow_max</th>
+      <th>churn</th>
+      <th>tenure</th>
+      <th>months_activ</th>
+      <th>months_to_end</th>
+      <th>months_modif_prod</th>
+      <th>months_renewal</th>
+      <th>channel_epu</th>
+      <th>channel_ewp</th>
+      <th>channel_fix</th>
+      <th>channel_foo</th>
+      <th>channel_lmk</th>
+      <th>channel_sdd</th>
+      <th>channel_usi</th>
+      <th>origin_ewx</th>
+      <th>origin_kam</th>
+      <th>origin_ldk</th>
+      <th>origin_lxi</th>
+      <th>origin_usa</th>
+      <th>activity_apd</th>
+      <th>activity_ckf</th>
+      <th>activity_clu</th>
+      <th>activity_cwo</th>
+      <th>activity_fmw</th>
+      <th>activity_kkk</th>
+      <th>activity_kwu</th>
+      <th>activity_sfi</th>
+      <th>activity_wxe</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>1.609600e+04</td>
+      <td>1.609600e+04</td>
+      <td>1.609600e+04</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>15970.000000</td>
+      <td>16096.000000</td>
+      <td>15970.000000</td>
+      <td>15970.000000</td>
+      <td>15970.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16083.000000</td>
+      <td>16083.000000</td>
+      <td>16096.000000</td>
+      <td>16081.000000</td>
+      <td>16096.000000</td>
+      <td>16093.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>1.948044e+05</td>
+      <td>3.191164e+04</td>
+      <td>1.946154e+04</td>
+      <td>2370.555949</td>
+      <td>1907.347229</td>
+      <td>0.991547</td>
+      <td>70.309945</td>
+      <td>0.135901</td>
+      <td>0.052951</td>
+      <td>43.533496</td>
+      <td>0.184145</td>
+      <td>196.123447</td>
+      <td>22.462276</td>
+      <td>21.460318</td>
+      <td>1.347788</td>
+      <td>217.987028</td>
+      <td>5.030629</td>
+      <td>20.604131</td>
+      <td>0.099093</td>
+      <td>5.329958</td>
+      <td>58.929858</td>
+      <td>6.376615</td>
+      <td>35.741240</td>
+      <td>4.924640</td>
+      <td>0.000249</td>
+      <td>0.060015</td>
+      <td>0.000124</td>
+      <td>0.458313</td>
+      <td>0.128790</td>
+      <td>0.000746</td>
+      <td>0.089712</td>
+      <td>0.000062</td>
+      <td>0.280629</td>
+      <td>0.227634</td>
+      <td>0.486146</td>
+      <td>0.000124</td>
+      <td>0.097975</td>
+      <td>0.011742</td>
+      <td>0.007393</td>
+      <td>0.007580</td>
+      <td>0.013606</td>
+      <td>0.026218</td>
+      <td>0.014289</td>
+      <td>0.005157</td>
+      <td>0.007393</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>6.795151e+05</td>
+      <td>1.775885e+05</td>
+      <td>8.235676e+04</td>
+      <td>4035.085664</td>
+      <td>5257.364759</td>
+      <td>5.160969</td>
+      <td>79.023251</td>
+      <td>0.026252</td>
+      <td>0.048617</td>
+      <td>5.212252</td>
+      <td>0.387615</td>
+      <td>494.366979</td>
+      <td>23.700883</td>
+      <td>27.917349</td>
+      <td>1.459808</td>
+      <td>366.742030</td>
+      <td>1.676101</td>
+      <td>21.772421</td>
+      <td>0.298796</td>
+      <td>1.749248</td>
+      <td>20.125024</td>
+      <td>3.633479</td>
+      <td>30.609746</td>
+      <td>3.812127</td>
+      <td>0.015763</td>
+      <td>0.237522</td>
+      <td>0.011147</td>
+      <td>0.498275</td>
+      <td>0.334978</td>
+      <td>0.027295</td>
+      <td>0.285777</td>
+      <td>0.007882</td>
+      <td>0.449320</td>
+      <td>0.419318</td>
+      <td>0.499824</td>
+      <td>0.011147</td>
+      <td>0.297290</td>
+      <td>0.107726</td>
+      <td>0.085668</td>
+      <td>0.086733</td>
+      <td>0.115852</td>
+      <td>0.159787</td>
+      <td>0.118684</td>
+      <td>0.071626</td>
+      <td>0.085668</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>-1.252760e+05</td>
+      <td>-3.037000e+03</td>
+      <td>-9.138600e+04</td>
+      <td>-16689.260000</td>
+      <td>-85627.000000</td>
+      <td>0.000000</td>
+      <td>-242.960000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>-0.122184</td>
+      <td>0.000000</td>
+      <td>-9038.210000</td>
+      <td>-525.540000</td>
+      <td>-615.660000</td>
+      <td>1.000000</td>
+      <td>-4148.990000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>16.000000</td>
+      <td>-112.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>5.906250e+03</td>
+      <td>0.000000e+00</td>
+      <td>0.000000e+00</td>
+      <td>513.230000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>16.230000</td>
+      <td>0.115237</td>
+      <td>0.000000</td>
+      <td>40.606701</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>11.960000</td>
+      <td>11.950000</td>
+      <td>1.000000</td>
+      <td>51.970000</td>
+      <td>4.000000</td>
+      <td>12.500000</td>
+      <td>0.000000</td>
+      <td>4.000000</td>
+      <td>44.000000</td>
+      <td>3.000000</td>
+      <td>7.000000</td>
+      <td>2.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>1.533250e+04</td>
+      <td>0.000000e+00</td>
+      <td>9.010000e+02</td>
+      <td>1179.160000</td>
+      <td>378.000000</td>
+      <td>0.000000</td>
+      <td>19.440000</td>
+      <td>0.142881</td>
+      <td>0.086163</td>
+      <td>44.311378</td>
+      <td>0.000000</td>
+      <td>44.465000</td>
+      <td>21.090000</td>
+      <td>20.970000</td>
+      <td>1.000000</td>
+      <td>119.680000</td>
+      <td>5.000000</td>
+      <td>13.856000</td>
+      <td>0.000000</td>
+      <td>5.000000</td>
+      <td>57.000000</td>
+      <td>6.000000</td>
+      <td>29.000000</td>
+      <td>5.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>5.022150e+04</td>
+      <td>0.000000e+00</td>
+      <td>4.127000e+03</td>
+      <td>2692.077500</td>
+      <td>1994.250000</td>
+      <td>0.000000</td>
+      <td>131.470000</td>
+      <td>0.146348</td>
+      <td>0.098837</td>
+      <td>44.311378</td>
+      <td>0.000000</td>
+      <td>218.090000</td>
+      <td>29.640000</td>
+      <td>29.640000</td>
+      <td>1.000000</td>
+      <td>275.810000</td>
+      <td>6.000000</td>
+      <td>19.800000</td>
+      <td>0.000000</td>
+      <td>6.000000</td>
+      <td>71.000000</td>
+      <td>9.000000</td>
+      <td>64.000000</td>
+      <td>8.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>1.609711e+07</td>
+      <td>4.188440e+06</td>
+      <td>4.538720e+06</td>
+      <td>103801.930000</td>
+      <td>175375.000000</td>
+      <td>50.000000</td>
+      <td>2411.690000</td>
+      <td>0.273963</td>
+      <td>0.195975</td>
+      <td>59.444710</td>
+      <td>1.000000</td>
+      <td>15042.790000</td>
+      <td>374.640000</td>
+      <td>374.640000</td>
+      <td>32.000000</td>
+      <td>24570.650000</td>
+      <td>16.000000</td>
+      <td>500.000000</td>
+      <td>1.000000</td>
+      <td>16.000000</td>
+      <td>185.000000</td>
+      <td>17.000000</td>
+      <td>185.000000</td>
+      <td>30.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+We can see that the standard deviation is very high for some variables.
+
+Now we will convert the negative values to NaN since Log transformation does not work with negative data.
+
+We can't apply Log transformation to 0 too, so we will add a constant 1.
+
+
+```python
+# Remove negative values
+train.loc[train.cons_12m < 0,"cons_12m"] = np.nan
+train.loc[train.cons_gas_12m < 0,"cons_gas_12m"] = np.nan
+train.loc[train.cons_last_month < 0,"cons_last_month"] = np.nan
+train.loc[train.forecast_cons_12m < 0,"forecast_cons_12m"] = np.nan
+train.loc[train.forecast_cons_year < 0,"forecast_cons_year"] = np.nan
+train.loc[train.forecast_meter_rent_12m < 0,"forecast_meter_rent_12m"] = np.nan
+train.loc[train.imp_cons < 0,"imp_cons"] = np.nan
+```
+
+
+```python
+# Apply log10 transformation
+train["cons_12m"] = np.log10(train["cons_12m"]+1)
+train["cons_gas_12m"] = np.log10(train["cons_gas_12m"]+1)
+train["cons_last_month"] = np.log10(train["cons_last_month"]+1)
+train["forecast_cons_12m"] = np.log10(train["forecast_cons_12m"]+1)
+train["forecast_cons_year"] = np.log10(train["forecast_cons_year"]+1)
+train["forecast_meter_rent_12m"] = np.log10(train["forecast_meter_rent_12m"]+1)
+train["imp_cons"] = np.log10(train["imp_cons"]+1)
+```
+
+Now let's see how the distribution looks like.
+
+
+```python
+fig, axs = plt.subplots(nrows=7, figsize=(18,50))
+# Plot histograms
+sns.distplot((train["cons_12m"].dropna()), ax=axs[0])
+sns.distplot((train[train["has_gas"]==1]["cons_gas_12m"].dropna()), ax=axs[1])
+sns.distplot((train["cons_last_month"].dropna()), ax=axs[2])
+sns.distplot((train["forecast_cons_12m"].dropna()), ax=axs[3])
+sns.distplot((train["forecast_cons_year"].dropna()), ax=axs[4])
+sns.distplot((train["forecast_meter_rent_12m"].dropna()), ax=axs[5])
+sns.distplot((train["imp_cons"].dropna()), ax=axs[6])
+plt.show()
+```
+
+    /usr/local/lib/python3.7/dist-packages/seaborn/distributions.py:2619: FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+      warnings.warn(msg, FutureWarning)
+    /usr/local/lib/python3.7/dist-packages/seaborn/distributions.py:2619: FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+      warnings.warn(msg, FutureWarning)
+    /usr/local/lib/python3.7/dist-packages/seaborn/distributions.py:2619: FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+      warnings.warn(msg, FutureWarning)
+    /usr/local/lib/python3.7/dist-packages/seaborn/distributions.py:2619: FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+      warnings.warn(msg, FutureWarning)
+    /usr/local/lib/python3.7/dist-packages/seaborn/distributions.py:2619: FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+      warnings.warn(msg, FutureWarning)
+    /usr/local/lib/python3.7/dist-packages/seaborn/distributions.py:2619: FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+      warnings.warn(msg, FutureWarning)
+    /usr/local/lib/python3.7/dist-packages/seaborn/distributions.py:2619: FutureWarning: `distplot` is a deprecated function and will be removed in a future version. Please adapt your code to use either `displot` (a figure-level function with similar flexibility) or `histplot` (an axes-level function for histograms).
+      warnings.warn(msg, FutureWarning)
+    
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_92_1.png)
+
+
+
+```python
+fig, axs = plt.subplots(nrows=7, figsize=(18,50))
+# Plot boxplots
+sns.boxplot((train["cons_12m"].dropna()), ax=axs[0])
+sns.boxplot((train[train["has_gas"]==1]["cons_gas_12m"].dropna()), ax=axs[1])
+sns.boxplot((train["cons_last_month"].dropna()), ax=axs[2])
+sns.boxplot((train["forecast_cons_12m"].dropna()), ax=axs[3])
+sns.boxplot((train["forecast_cons_year"].dropna()), ax=axs[4])
+sns.boxplot((train["forecast_meter_rent_12m"].dropna()), ax=axs[5])
+sns.boxplot((train["imp_cons"].dropna()), ax=axs[6])
+plt.show()
+```
+
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_93_1.png)
+
+
+
+```python
+train.describe()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>cons_12m</th>
+      <th>cons_gas_12m</th>
+      <th>cons_last_month</th>
+      <th>forecast_cons_12m</th>
+      <th>forecast_cons_year</th>
+      <th>forecast_discount_energy</th>
+      <th>forecast_meter_rent_12m</th>
+      <th>forecast_price_energy_p1</th>
+      <th>forecast_price_energy_p2</th>
+      <th>forecast_price_pow_p1</th>
+      <th>has_gas</th>
+      <th>imp_cons</th>
+      <th>margin_gross_pow_ele</th>
+      <th>margin_net_pow_ele</th>
+      <th>nb_prod_act</th>
+      <th>net_margin</th>
+      <th>num_years_antig</th>
+      <th>pow_max</th>
+      <th>churn</th>
+      <th>tenure</th>
+      <th>months_activ</th>
+      <th>months_to_end</th>
+      <th>months_modif_prod</th>
+      <th>months_renewal</th>
+      <th>channel_epu</th>
+      <th>channel_ewp</th>
+      <th>channel_fix</th>
+      <th>channel_foo</th>
+      <th>channel_lmk</th>
+      <th>channel_sdd</th>
+      <th>channel_usi</th>
+      <th>origin_ewx</th>
+      <th>origin_kam</th>
+      <th>origin_ldk</th>
+      <th>origin_lxi</th>
+      <th>origin_usa</th>
+      <th>activity_apd</th>
+      <th>activity_ckf</th>
+      <th>activity_clu</th>
+      <th>activity_cwo</th>
+      <th>activity_fmw</th>
+      <th>activity_kkk</th>
+      <th>activity_kwu</th>
+      <th>activity_sfi</th>
+      <th>activity_wxe</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>16069.000000</td>
+      <td>16090.000000</td>
+      <td>16050.000000</td>
+      <td>16055.000000</td>
+      <td>16071.000000</td>
+      <td>15970.000000</td>
+      <td>16092.000000</td>
+      <td>15970.000000</td>
+      <td>15970.000000</td>
+      <td>15970.000000</td>
+      <td>16096.000000</td>
+      <td>16069.000000</td>
+      <td>16083.000000</td>
+      <td>16083.000000</td>
+      <td>16096.000000</td>
+      <td>16081.000000</td>
+      <td>16096.000000</td>
+      <td>16093.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+      <td>16096.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>4.283812</td>
+      <td>0.800300</td>
+      <td>2.359281</td>
+      <td>3.006826</td>
+      <td>1.869956</td>
+      <td>0.991547</td>
+      <td>1.549610</td>
+      <td>0.135901</td>
+      <td>0.052951</td>
+      <td>43.533496</td>
+      <td>0.184145</td>
+      <td>1.305021</td>
+      <td>22.462276</td>
+      <td>21.460318</td>
+      <td>1.347788</td>
+      <td>217.987028</td>
+      <td>5.030629</td>
+      <td>20.604131</td>
+      <td>0.099093</td>
+      <td>5.329958</td>
+      <td>58.929858</td>
+      <td>6.376615</td>
+      <td>35.741240</td>
+      <td>4.924640</td>
+      <td>0.000249</td>
+      <td>0.060015</td>
+      <td>0.000124</td>
+      <td>0.458313</td>
+      <td>0.128790</td>
+      <td>0.000746</td>
+      <td>0.089712</td>
+      <td>0.000062</td>
+      <td>0.280629</td>
+      <td>0.227634</td>
+      <td>0.486146</td>
+      <td>0.000124</td>
+      <td>0.097975</td>
+      <td>0.011742</td>
+      <td>0.007393</td>
+      <td>0.007580</td>
+      <td>0.013606</td>
+      <td>0.026218</td>
+      <td>0.014289</td>
+      <td>0.005157</td>
+      <td>0.007393</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>0.915265</td>
+      <td>1.748833</td>
+      <td>1.789067</td>
+      <td>0.709778</td>
+      <td>1.612963</td>
+      <td>5.160969</td>
+      <td>0.589394</td>
+      <td>0.026252</td>
+      <td>0.048617</td>
+      <td>5.212252</td>
+      <td>0.387615</td>
+      <td>1.165532</td>
+      <td>23.700883</td>
+      <td>27.917349</td>
+      <td>1.459808</td>
+      <td>366.742030</td>
+      <td>1.676101</td>
+      <td>21.772421</td>
+      <td>0.298796</td>
+      <td>1.749248</td>
+      <td>20.125024</td>
+      <td>3.633479</td>
+      <td>30.609746</td>
+      <td>3.812127</td>
+      <td>0.015763</td>
+      <td>0.237522</td>
+      <td>0.011147</td>
+      <td>0.498275</td>
+      <td>0.334978</td>
+      <td>0.027295</td>
+      <td>0.285777</td>
+      <td>0.007882</td>
+      <td>0.449320</td>
+      <td>0.419318</td>
+      <td>0.499824</td>
+      <td>0.011147</td>
+      <td>0.297290</td>
+      <td>0.107726</td>
+      <td>0.085668</td>
+      <td>0.086733</td>
+      <td>0.115852</td>
+      <td>0.159787</td>
+      <td>0.118684</td>
+      <td>0.071626</td>
+      <td>0.085668</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>-0.122184</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>-525.540000</td>
+      <td>-615.660000</td>
+      <td>1.000000</td>
+      <td>-4148.990000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>16.000000</td>
+      <td>-112.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>3.773786</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>2.713952</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.236285</td>
+      <td>0.115237</td>
+      <td>0.000000</td>
+      <td>40.606701</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>11.960000</td>
+      <td>11.950000</td>
+      <td>1.000000</td>
+      <td>51.970000</td>
+      <td>4.000000</td>
+      <td>12.500000</td>
+      <td>0.000000</td>
+      <td>4.000000</td>
+      <td>44.000000</td>
+      <td>3.000000</td>
+      <td>7.000000</td>
+      <td>2.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>4.187408</td>
+      <td>0.000000</td>
+      <td>2.959041</td>
+      <td>3.073579</td>
+      <td>2.583199</td>
+      <td>0.000000</td>
+      <td>1.310481</td>
+      <td>0.142881</td>
+      <td>0.086163</td>
+      <td>44.311378</td>
+      <td>0.000000</td>
+      <td>1.662380</td>
+      <td>21.090000</td>
+      <td>20.970000</td>
+      <td>1.000000</td>
+      <td>119.680000</td>
+      <td>5.000000</td>
+      <td>13.856000</td>
+      <td>0.000000</td>
+      <td>5.000000</td>
+      <td>57.000000</td>
+      <td>6.000000</td>
+      <td>29.000000</td>
+      <td>5.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>4.701508</td>
+      <td>0.000000</td>
+      <td>3.617000</td>
+      <td>3.430950</td>
+      <td>3.301030</td>
+      <td>0.000000</td>
+      <td>2.122126</td>
+      <td>0.146348</td>
+      <td>0.098837</td>
+      <td>44.311378</td>
+      <td>0.000000</td>
+      <td>2.341118</td>
+      <td>29.640000</td>
+      <td>29.640000</td>
+      <td>1.000000</td>
+      <td>275.810000</td>
+      <td>6.000000</td>
+      <td>19.800000</td>
+      <td>0.000000</td>
+      <td>6.000000</td>
+      <td>71.000000</td>
+      <td>9.000000</td>
+      <td>64.000000</td>
+      <td>8.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>7.206748</td>
+      <td>6.622052</td>
+      <td>6.656933</td>
+      <td>5.016210</td>
+      <td>5.243970</td>
+      <td>50.000000</td>
+      <td>3.382502</td>
+      <td>0.273963</td>
+      <td>0.195975</td>
+      <td>59.444710</td>
+      <td>1.000000</td>
+      <td>4.177357</td>
+      <td>374.640000</td>
+      <td>374.640000</td>
+      <td>32.000000</td>
+      <td>24570.650000</td>
+      <td>16.000000</td>
+      <td>500.000000</td>
+      <td>1.000000</td>
+      <td>16.000000</td>
+      <td>185.000000</td>
+      <td>17.000000</td>
+      <td>185.000000</td>
+      <td>30.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+Now the distribution looks more like normal distribution and the standard deviation has changed.
+
+We notice that there are still some values that are quite far from the range. We will deal with these outliers later.
+
+## 3. Calculating the correlation of the variables**
+
+
+```python
+correlation = features.corr()
+```
+
+
+```python
+# Plot correlation
+plt.figure(figsize=(19,15))
+sns.heatmap(correlation, xticklabels=correlation.columns.values,
+yticklabels=correlation.columns.values, annot = True, annot_kws={'size':10})
+# Axis ticks size
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.show()
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_99_0.png)
+
+
+Multicolliearity happens when one predictor variable in a multiple regression model can be linearly predicted from the others with a high degree of accuracy. This can lead to skewed or misleading results. Luckily, decision trees and boosted trees algorithms are immune to multicollinearity by nature. When they decide to split, the tree will choose only one of the perfectly correlated features. However, other algorithms like Logistic Regression or Linear Regression are not immune to that problem and should be fixed before training the model.
+
+
+```python
+# Calculate correlation of variables
+correlation = train.corr()
+```
+
+
+```python
+# Plot correlation
+plt.figure(figsize=(20,18))
+sns.heatmap(correlation, xticklabels=correlation.columns.values,
+yticklabels=correlation.columns.values, annot = True, annot_kws={'size':10})
+# Axis ticks size
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.show()
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_102_0.png)
+
+
+We can see that num_years_antig has a high correlation with months_activ (it provides us the same information). We can remove variables with very high correlation.
+
+
+```python
+train.drop(columns=["num_years_antig", "forecast_cons_year"],inplace=True)
+```
+
+## 4. Removing outliers
+
+The most common way to identify an outlier is:
+
+1. Data point that falls outside of 1.5 times of an interquartile range above the 3rd quartile and below the 1st quartile.
+
+Or
+
+2. Data point that falls outside of 3 standard deviations.
+
+
+As we identified during the exploratory phase, the consumption data has several outliers. We are going to remove those outliers.
+
+There are several ways to handle with those outliers such as removing them (this works well for massive datasets) or replacing them with sensible data (works better when the dataset is not that big).
+
+
+We will replace the outliers with the mean (average of the values excluding outliers).
+
+
+```python
+def replace_outliers_z_score(dataframe, column, Z=3):
+    """
+    Replace outliers with the mean values using the Z score.
+    Nan values are also replaced with the mean values.
+    """
+
+    from scipy.stats import zscore
+    df = dataframe.copy(deep=True)
+    df.dropna(inplace=True, subset=[column])
+
+    # Calculate mean without outliers
+    df["zscore"] = zscore(df[column])
+    mean_ = df[(df["zscore"] > -Z) & (df["zscore"] < Z)][column].mean()
+
+    # Replace with mean values
+    dataframe[column] = dataframe[column].fillna(mean_)
+    dataframe["zscore"] = zscore(dataframe[column])
+    no_outliers = dataframe[(dataframe["zscore"] < -Z) | (dataframe["zscore"] > Z)].shape[0]
+    dataframe.loc[(dataframe["zscore"] < -Z) | (dataframe["zscore"] > Z),column] = mean_
+    
+    # Print message
+    print("Replaced:", no_outliers, " outliers in ", column)
+    return dataframe.drop(columns="zscore")
+```
+
+
+```python
+for c in features.columns:
+    if c != "id":
+        features = replace_outliers_z_score(features,c)
+```
+
+    Replaced: 276  outliers in  mean_year_price_p1_var
+    Replaced: 0  outliers in  mean_year_price_p2_var
+    Replaced: 0  outliers in  mean_year_price_p3_var
+    Replaced: 120  outliers in  mean_year_price_p1_fix
+    Replaced: 0  outliers in  mean_year_price_p2_fix
+    Replaced: 0  outliers in  mean_year_price_p3_fix
+    Replaced: 122  outliers in  mean_year_price_p1
+    Replaced: 0  outliers in  mean_year_price_p2
+    Replaced: 0  outliers in  mean_year_price_p3
+    
+
+
+```python
+features.reset_index(drop=True, inplace=True)
+```
+
+As we identified during the exploratory phase, and when carrying out the log transformation , the dataset has several outliers.
+
+We will also replace the outliers with the mean (average of the values excluding outliers).
+
+
+```python
+def _find_outliers_iqr(dataframe, column):
+    # Find outliers using the 1.5*IQR rule.
+
+    col = sorted(dataframe[column])
+    q1, q3= np.percentile(col,[25,75])
+    iqr = q3 - q1
+    lower_bound = q1 -(1.5 * iqr)
+    upper_bound = q3 +(1.5 * iqr)
+    results = {"iqr": iqr, "lower_bound":lower_bound, "upper_bound":upper_bound}
+    return results
+```
+
+
+```python
+def remove_outliers_iqr(dataframe, column):
+    # Remove outliers using the 1.5*IQR rule.
+    outliers = _find_outliers_iqr(dataframe, column)
+    removed = dataframe[(dataframe[column] < outliers["lower_bound"]) |
+                          (dataframe[column] > outliers["upper_bound"])].shape
+    dataframe = dataframe[(dataframe[column] > outliers["lower_bound"]) &
+                          (dataframe[column] < outliers["upper_bound"])]
+    print("Removed:", removed[0], " outliers")
+    return dataframe
+```
+
+
+```python
+def remove_outliers_z_score(dataframe, column, Z=3):
+    # Remove outliers using the Z score. Values with more than 3 are removed.
+    from scipy.stats import zscore
+    dataframe["zscore"] = zscore(dataframe[column])
+    removed = dataframe[(dataframe["zscore"] < -Z) |
+                        (dataframe["zscore"] > Z)].shape
+    dataframe = dataframe[(dataframe["zscore"] > -Z) &
+                          (dataframe["zscore"] < Z)]
+    print("Removed:", removed[0], " outliers of ", column)
+    return dataframe.drop(columns="zscore")
+```
+
+
+```python
+def replace_outliers_z_score(dataframe, column, Z=3):
+    # Replace outliers with the mean values using the Z score.
+    # Nan values are also replaced with the mean values.
+
+    from scipy.stats import zscore
+    df = dataframe.copy(deep=True)
+    df.dropna(inplace=True, subset=[column])
+    
+    # Calculate mean without outliers
+    df["zscore"] = zscore(df[column])
+    mean_ = df[(df["zscore"] > -Z) & (df["zscore"] < Z)][column].mean()
+
+    # Replace with mean values
+    no_outliers = dataframe[column].isnull().sum()
+    dataframe[column] = dataframe[column].fillna(mean_)
+    dataframe["zscore"] = zscore(dataframe[column])
+    dataframe.loc[(dataframe["zscore"] < -Z) | (dataframe["zscore"] > Z),column] = mean_
+    
+    # Print message
+    print("Replaced:", no_outliers, " outliers in ", column)
+    return dataframe.drop(columns="zscore")
+```
+
+
+```python
+train = replace_outliers_z_score(train,"cons_12m")
+train = replace_outliers_z_score(train,"cons_gas_12m")
+train = replace_outliers_z_score(train,"cons_last_month")
+train = replace_outliers_z_score(train,"forecast_cons_12m")
+
+#train = replace_outliers_z_score(train,"forecast_cons_year")
+train = replace_outliers_z_score(train,"forecast_discount_energy")
+train = replace_outliers_z_score(train,"forecast_meter_rent_12m")
+train = replace_outliers_z_score(train,"forecast_price_energy_p1")
+train = replace_outliers_z_score(train,"forecast_price_energy_p2")
+train = replace_outliers_z_score(train,"forecast_price_pow_p1")
+train = replace_outliers_z_score(train,"imp_cons")
+train = replace_outliers_z_score(train,"margin_gross_pow_ele")
+train = replace_outliers_z_score(train,"margin_net_pow_ele")
+train = replace_outliers_z_score(train,"net_margin")
+train = replace_outliers_z_score(train,"pow_max")
+train = replace_outliers_z_score(train,"months_activ")
+train = replace_outliers_z_score(train,"months_to_end")
+train = replace_outliers_z_score(train,"months_modif_prod")
+train = replace_outliers_z_score(train,"months_renewal")
+```
+
+    Replaced: 27  outliers in  cons_12m
+    Replaced: 6  outliers in  cons_gas_12m
+    Replaced: 46  outliers in  cons_last_month
+    Replaced: 41  outliers in  forecast_cons_12m
+    Replaced: 126  outliers in  forecast_discount_energy
+    Replaced: 4  outliers in  forecast_meter_rent_12m
+    Replaced: 126  outliers in  forecast_price_energy_p1
+    Replaced: 126  outliers in  forecast_price_energy_p2
+    Replaced: 126  outliers in  forecast_price_pow_p1
+    Replaced: 27  outliers in  imp_cons
+    Replaced: 13  outliers in  margin_gross_pow_ele
+    Replaced: 13  outliers in  margin_net_pow_ele
+    Replaced: 15  outliers in  net_margin
+    Replaced: 3  outliers in  pow_max
+    Replaced: 0  outliers in  months_activ
+    Replaced: 0  outliers in  months_to_end
+    Replaced: 0  outliers in  months_modif_prod
+    Replaced: 0  outliers in  months_renewal
+    
+
+
+```python
+train.reset_index(drop=True, inplace=True)
+```
+
+Now, let's see how the boxplots changed!
+
+
+```python
+fig, axs = plt.subplots(nrows=7, figsize=(18,50))
+
+# Plot boxplots
+sns.boxplot((train["cons_12m"].dropna()), ax=axs[0])
+sns.boxplot((train[train["has_gas"]==1]["cons_gas_12m"].dropna()), ax=axs[1])
+sns.boxplot((train["cons_last_month"].dropna()), ax=axs[2])
+sns.boxplot((train["forecast_cons_12m"].dropna()), ax=axs[3])
+
+#sns.boxplot((train["forecast_cons_year"].dropna()), ax=axs[4])
+sns.boxplot((train["forecast_meter_rent_12m"].dropna()), ax=axs[5])
+sns.boxplot((train["imp_cons"].dropna()), ax=axs[6])
+plt.show()
+```
+
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    /usr/local/lib/python3.7/dist-packages/seaborn/_decorators.py:43: FutureWarning: Pass the following variable as a keyword arg: x. From version 0.12, the only valid positional argument will be `data`, and passing other arguments without an explicit keyword will result in an error or misinterpretation.
+      FutureWarning
+    
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/feature-engineering/output_125_1.png)
+
+
+## 6. Saving data to csv
+
+Let's check the dataframes before saving data.
+
+
+```python
+train
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>cons_12m</th>
+      <th>cons_gas_12m</th>
+      <th>cons_last_month</th>
+      <th>forecast_cons_12m</th>
+      <th>forecast_discount_energy</th>
+      <th>forecast_meter_rent_12m</th>
+      <th>forecast_price_energy_p1</th>
+      <th>forecast_price_energy_p2</th>
+      <th>forecast_price_pow_p1</th>
+      <th>has_gas</th>
+      <th>imp_cons</th>
+      <th>margin_gross_pow_ele</th>
+      <th>margin_net_pow_ele</th>
+      <th>nb_prod_act</th>
+      <th>net_margin</th>
+      <th>pow_max</th>
+      <th>churn</th>
+      <th>tenure</th>
+      <th>months_activ</th>
+      <th>months_to_end</th>
+      <th>months_modif_prod</th>
+      <th>months_renewal</th>
+      <th>channel_epu</th>
+      <th>channel_ewp</th>
+      <th>channel_fix</th>
+      <th>channel_foo</th>
+      <th>channel_lmk</th>
+      <th>channel_sdd</th>
+      <th>channel_usi</th>
+      <th>origin_ewx</th>
+      <th>origin_kam</th>
+      <th>origin_ldk</th>
+      <th>origin_lxi</th>
+      <th>origin_usa</th>
+      <th>activity_apd</th>
+      <th>activity_ckf</th>
+      <th>activity_clu</th>
+      <th>activity_cwo</th>
+      <th>activity_fmw</th>
+      <th>activity_kkk</th>
+      <th>activity_kwu</th>
+      <th>activity_sfi</th>
+      <th>activity_wxe</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>48ada52261e7cf58715202705a0451c9</td>
+      <td>5.490346</td>
+      <td>0.000000</td>
+      <td>4.001128</td>
+      <td>4.423595</td>
+      <td>0.0</td>
+      <td>2.556652</td>
+      <td>0.095919</td>
+      <td>0.088347</td>
+      <td>58.995952</td>
+      <td>0</td>
+      <td>2.920541</td>
+      <td>-41.76</td>
+      <td>-41.76</td>
+      <td>1</td>
+      <td>198.346424</td>
+      <td>18.402912</td>
+      <td>0</td>
+      <td>3</td>
+      <td>37.0</td>
+      <td>10.0</td>
+      <td>37.0</td>
+      <td>1.000000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>24011ae4ebbe3035111d65fa7c15bc57</td>
+      <td>4.327104</td>
+      <td>4.739944</td>
+      <td>0.000000</td>
+      <td>3.085953</td>
+      <td>0.0</td>
+      <td>0.444045</td>
+      <td>0.114481</td>
+      <td>0.098142</td>
+      <td>40.606701</td>
+      <td>1</td>
+      <td>0.000000</td>
+      <td>25.44</td>
+      <td>25.44</td>
+      <td>2</td>
+      <td>678.990000</td>
+      <td>43.648000</td>
+      <td>1</td>
+      <td>3</td>
+      <td>30.0</td>
+      <td>5.0</td>
+      <td>2.0</td>
+      <td>6.000000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>d29c2c54acc38ff3c0614d0a653813dd</td>
+      <td>3.668479</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>2.280920</td>
+      <td>0.0</td>
+      <td>1.237292</td>
+      <td>0.145711</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>0</td>
+      <td>0.000000</td>
+      <td>16.38</td>
+      <td>16.38</td>
+      <td>1</td>
+      <td>18.890000</td>
+      <td>13.800000</td>
+      <td>0</td>
+      <td>7</td>
+      <td>76.0</td>
+      <td>7.0</td>
+      <td>76.0</td>
+      <td>4.000000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>764c75f661154dac3a6c254cd082ea7d</td>
+      <td>2.736397</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.689841</td>
+      <td>0.0</td>
+      <td>1.599009</td>
+      <td>0.165794</td>
+      <td>0.087899</td>
+      <td>44.311378</td>
+      <td>0</td>
+      <td>0.000000</td>
+      <td>28.60</td>
+      <td>28.60</td>
+      <td>1</td>
+      <td>6.600000</td>
+      <td>13.856000</td>
+      <td>0</td>
+      <td>6</td>
+      <td>68.0</td>
+      <td>3.0</td>
+      <td>68.0</td>
+      <td>8.000000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>bba03439a292a1e166f80264c16191cb</td>
+      <td>3.200029</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>2.382089</td>
+      <td>0.0</td>
+      <td>1.318689</td>
+      <td>0.146694</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>0</td>
+      <td>0.000000</td>
+      <td>30.22</td>
+      <td>30.22</td>
+      <td>1</td>
+      <td>25.460000</td>
+      <td>13.200000</td>
+      <td>0</td>
+      <td>6</td>
+      <td>69.0</td>
+      <td>2.0</td>
+      <td>69.0</td>
+      <td>9.000000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>16091</th>
+      <td>18463073fb097fc0ac5d3e040f356987</td>
+      <td>4.508812</td>
+      <td>4.680707</td>
+      <td>0.000000</td>
+      <td>3.667360</td>
+      <td>0.0</td>
+      <td>1.291591</td>
+      <td>0.138305</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>1</td>
+      <td>0.000000</td>
+      <td>27.88</td>
+      <td>27.88</td>
+      <td>2</td>
+      <td>381.770000</td>
+      <td>15.000000</td>
+      <td>0</td>
+      <td>3</td>
+      <td>43.0</td>
+      <td>4.0</td>
+      <td>7.0</td>
+      <td>4.792645</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16092</th>
+      <td>d0a6f71671571ed83b2645d23af6de00</td>
+      <td>3.858778</td>
+      <td>0.000000</td>
+      <td>2.260071</td>
+      <td>2.801191</td>
+      <td>0.0</td>
+      <td>2.161458</td>
+      <td>0.100167</td>
+      <td>0.091892</td>
+      <td>58.995952</td>
+      <td>0</td>
+      <td>1.228913</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>90.340000</td>
+      <td>6.000000</td>
+      <td>1</td>
+      <td>4</td>
+      <td>40.0</td>
+      <td>7.0</td>
+      <td>40.0</td>
+      <td>4.000000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16093</th>
+      <td>10e6828ddd62cbcf687cb74928c4c2d2</td>
+      <td>3.265996</td>
+      <td>0.000000</td>
+      <td>2.255273</td>
+      <td>2.281919</td>
+      <td>0.0</td>
+      <td>2.115943</td>
+      <td>0.116900</td>
+      <td>0.100015</td>
+      <td>40.606701</td>
+      <td>0</td>
+      <td>1.279895</td>
+      <td>39.84</td>
+      <td>39.84</td>
+      <td>1</td>
+      <td>20.380000</td>
+      <td>15.935000</td>
+      <td>1</td>
+      <td>3</td>
+      <td>46.0</td>
+      <td>1.0</td>
+      <td>46.0</td>
+      <td>10.000000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16094</th>
+      <td>1cf20fd6206d7678d5bcafd28c53b4db</td>
+      <td>2.120574</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>1.308351</td>
+      <td>0.0</td>
+      <td>0.912753</td>
+      <td>0.145711</td>
+      <td>0.000000</td>
+      <td>44.311378</td>
+      <td>0</td>
+      <td>0.000000</td>
+      <td>13.08</td>
+      <td>13.08</td>
+      <td>1</td>
+      <td>0.960000</td>
+      <td>11.000000</td>
+      <td>0</td>
+      <td>4</td>
+      <td>40.0</td>
+      <td>7.0</td>
+      <td>40.0</td>
+      <td>4.000000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16095</th>
+      <td>563dde550fd624d7352f3de77c0cdfcd</td>
+      <td>3.941064</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>2.882758</td>
+      <td>0.0</td>
+      <td>0.315970</td>
+      <td>0.167086</td>
+      <td>0.088454</td>
+      <td>45.311378</td>
+      <td>0</td>
+      <td>0.000000</td>
+      <td>11.84</td>
+      <td>11.84</td>
+      <td>1</td>
+      <td>96.340000</td>
+      <td>10.392000</td>
+      <td>0</td>
+      <td>6</td>
+      <td>72.0</td>
+      <td>11.0</td>
+      <td>72.0</td>
+      <td>0.000000</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>16096 rows × 44 columns</p>
+</div>
+
+
+
+
+```python
+history
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>price_date</th>
+      <th>price_p1_var</th>
+      <th>price_p2_var</th>
+      <th>price_p3_var</th>
+      <th>price_p1_fix</th>
+      <th>price_p2_fix</th>
+      <th>price_p3_fix</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-01-01</td>
+      <td>0.151367</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-02-01</td>
+      <td>0.151367</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-03-01</td>
+      <td>0.151367</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-04-01</td>
+      <td>0.149626</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>038af19179925da21a25619c5a24b745</td>
+      <td>2015-05-01</td>
+      <td>0.149626</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266931</td>
+      <td>0.00000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>192997</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-08-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+    <tr>
+      <th>192998</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-09-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+    <tr>
+      <th>192999</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-10-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+    <tr>
+      <th>193000</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-11-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+    <tr>
+      <th>193001</th>
+      <td>16f51cdc2baa19af0b940ee1b3dd17d5</td>
+      <td>2015-12-01</td>
+      <td>0.119916</td>
+      <td>0.102232</td>
+      <td>0.076257</td>
+      <td>40.728885</td>
+      <td>24.43733</td>
+      <td>16.291555</td>
+    </tr>
+  </tbody>
+</table>
+<p>193002 rows × 8 columns</p>
+</div>
+
+
+
+
+```python
+features
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>id</th>
+      <th>mean_year_price_p1_var</th>
+      <th>mean_year_price_p2_var</th>
+      <th>mean_year_price_p3_var</th>
+      <th>mean_year_price_p1_fix</th>
+      <th>mean_year_price_p2_fix</th>
+      <th>mean_year_price_p3_fix</th>
+      <th>mean_year_price_p1</th>
+      <th>mean_year_price_p2</th>
+      <th>mean_year_price_p3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0002203ffbb812588b632b9e628cc38d</td>
+      <td>0.124338</td>
+      <td>0.103794</td>
+      <td>0.073160</td>
+      <td>40.701732</td>
+      <td>24.421038</td>
+      <td>16.280694</td>
+      <td>40.826071</td>
+      <td>24.524832</td>
+      <td>16.353854</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0004351ebdd665e6ee664792efc4fd13</td>
+      <td>0.146426</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.385450</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.531877</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0010bcc39e42b3c2131ed2ce55246e3c</td>
+      <td>0.181558</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>45.319710</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>45.501268</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0010ee3855fdea87602a5b7aba8e42de</td>
+      <td>0.118757</td>
+      <td>0.098292</td>
+      <td>0.069032</td>
+      <td>40.647427</td>
+      <td>24.388455</td>
+      <td>16.258971</td>
+      <td>40.766185</td>
+      <td>24.486748</td>
+      <td>16.328003</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>00114d74e963e47177db89bc70108537</td>
+      <td>0.147926</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.266930</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.414856</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>16091</th>
+      <td>ffef185810e44254c3a4c6395e6b4d8a</td>
+      <td>0.138863</td>
+      <td>0.115125</td>
+      <td>0.080780</td>
+      <td>40.896427</td>
+      <td>24.637456</td>
+      <td>16.507972</td>
+      <td>41.035291</td>
+      <td>24.752581</td>
+      <td>16.588752</td>
+    </tr>
+    <tr>
+      <th>16092</th>
+      <td>fffac626da707b1b5ab11e8431a4d0a2</td>
+      <td>0.147137</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.311375</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+      <td>44.458512</td>
+      <td>0.000000</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>16093</th>
+      <td>fffc0cacd305dd51f316424bbb08d1bd</td>
+      <td>0.153879</td>
+      <td>0.129497</td>
+      <td>0.094842</td>
+      <td>41.160171</td>
+      <td>24.895768</td>
+      <td>16.763569</td>
+      <td>41.314049</td>
+      <td>25.025265</td>
+      <td>16.858411</td>
+    </tr>
+    <tr>
+      <th>16094</th>
+      <td>fffe4f5646aa39c7f97f95ae2679ce64</td>
+      <td>0.123858</td>
+      <td>0.103499</td>
+      <td>0.073735</td>
+      <td>40.606699</td>
+      <td>24.364017</td>
+      <td>16.242678</td>
+      <td>40.730558</td>
+      <td>24.467516</td>
+      <td>16.316414</td>
+    </tr>
+    <tr>
+      <th>16095</th>
+      <td>ffff7fa066f1fb305ae285bb03bf325a</td>
+      <td>0.125360</td>
+      <td>0.104895</td>
+      <td>0.075635</td>
+      <td>40.647427</td>
+      <td>24.388455</td>
+      <td>16.258971</td>
+      <td>40.772788</td>
+      <td>24.493350</td>
+      <td>16.334606</td>
+    </tr>
+  </tbody>
+</table>
+<p>16096 rows × 10 columns</p>
+</div>
+
+
+
+Now, save them to csv files.
+
+
+```python
+train.to_csv(r'processed_train.csv', index = False, header=True)
+```
+
+
+```python
+history.to_csv(r'processed_history.csv', index = False, header=True)
+```
+
+
+```python
+history.to_csv(r'features.csv', index = False, header=True)
+```
