@@ -9278,7 +9278,7 @@ plt.show(disp)
 ```
 
 
-![png](output_23_0.png)
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/model-evaluation/output_23_0.png)
 
 
 
