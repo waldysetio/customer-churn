@@ -8947,3 +8947,896 @@ history.to_csv(r'processed_history.csv', index = False, header=True)
 ```python
 history.to_csv(r'features.csv', index = False, header=True)
 ```
+
+# Modeling and Evaluation
+
+## 1. Importing packages
+
+
+```python
+import datetime
+from sklearn import metrics
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold
+import xgboost as xgb
+```
+
+
+```python
+%matplotlib inline
+```
+
+
+```python
+sns.set(color_codes=True)
+```
+
+## 2. Loading data
+
+
+```python
+train_data = pd.read_csv('https://raw.githubusercontent.com/waldysetio/customer-churn-analysis/main/processed-data/processed_train.csv')
+features = pd.read_csv('https://raw.githubusercontent.com/waldysetio/customer-churn-analysis/main/processed-data/features.csv')
+```
+
+Let's merge both dataframes.
+
+
+```python
+train = pd.merge(train_data, features, on="id")
+```
+
+
+```python
+pd.DataFrame({"Dataframe columns": train.columns})
+```
+
+
+
+
+<div>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Dataframe columns</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>id</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>cons_12m</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>cons_gas_12m</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>cons_last_month</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>forecast_cons_12m</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>forecast_discount_energy</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>forecast_meter_rent_12m</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>forecast_price_energy_p1</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>forecast_price_energy_p2</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>forecast_price_pow_p1</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>has_gas</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>imp_cons</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>margin_gross_pow_ele</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>margin_net_pow_ele</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>nb_prod_act</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>net_margin</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>pow_max</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>churn</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>tenure</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>months_activ</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>months_to_end</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>months_modif_prod</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>months_renewal</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>channel_epu</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>channel_ewp</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>channel_fix</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>channel_foo</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>channel_lmk</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>channel_sdd</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>channel_usi</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>origin_ewx</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>origin_kam</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>origin_ldk</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>origin_lxi</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>origin_usa</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>activity_apd</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>activity_ckf</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>activity_clu</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>activity_cwo</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>activity_fmw</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>activity_kkk</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>activity_kwu</td>
+    </tr>
+    <tr>
+      <th>42</th>
+      <td>activity_sfi</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td>activity_wxe</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td>mean_year_price_p1_var</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>mean_year_price_p2_var</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>mean_year_price_p3_var</td>
+    </tr>
+    <tr>
+      <th>47</th>
+      <td>mean_year_price_p1_fix</td>
+    </tr>
+    <tr>
+      <th>48</th>
+      <td>mean_year_price_p2_fix</td>
+    </tr>
+    <tr>
+      <th>49</th>
+      <td>mean_year_price_p3_fix</td>
+    </tr>
+    <tr>
+      <th>50</th>
+      <td>mean_year_price_p1</td>
+    </tr>
+    <tr>
+      <th>51</th>
+      <td>mean_year_price_p2</td>
+    </tr>
+    <tr>
+      <th>52</th>
+      <td>mean_year_price_p3</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+## 3. Splitting data
+
+We will use "churn" as the output or response and the rest columns as the features of our model.
+
+
+```python
+y = train["churn"]
+X = train.drop(labels = ["id","churn"], axis = 1)
+```
+
+Next we will split the data into training and validation data. The percentages of each test can be changed but a 75%-25% is a good ratio.
+We also use a random state generator in order to split it randomly.
+
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=18)
+```
+
+## 4. Modelling
+
+
+```python
+model = xgb.XGBClassifier(learning_rate=0.1,max_depth=6,n_estimators=500,n_jobs=-1)
+result = model.fit(X_train,y_train)
+```
+
+## 5. Model evaluation
+
+Let's evaluate our model using the evaluation metrics of:
+
+Accuracy : The most intuitive performance measure and it is simply a ratio of correctly predicted observation to the total observations.
+
+Precision : The ratio of correctly predicted positive observations to the total predicted positive observations.
+
+Recall (Sensitivity): The ratio of correctly predicted positive observations to the all observations in actual class.
+
+**Accuracy, Precision, Recall**
+
+This is the confusion matrix that shows the predicted values compared to the true values.
+
+
+```python
+from sklearn.metrics import plot_confusion_matrix
+
+class_names = ['0', '1']
+disp = plot_confusion_matrix(result, X_test, y_test,
+                                 display_labels=class_names,
+                                 cmap=plt.cm.Greens,
+                                 values_format = '.0f')
+plt.grid(False)  
+plt.show(disp)
+
+
+```
+
+
+![png](output_23_0.png)
+
+
+
+```python
+def evaluate(model_, X_test_, y_test_): 
+
+    # Get the model predictions
+    prediction_test_ = model_.predict(X_test_)
+
+    # Print the evaluation metrics as pandas dataframe 
+    results = pd.DataFrame({"Accuracy" : [metrics.accuracy_score(y_test_, prediction_test_)], 
+                            "Precision" : [metrics.precision_score(y_test_, prediction_test_)], 
+                            "Recall" : [metrics.recall_score(y_test_, prediction_test_)]})
+    return results
+```
+
+
+```python
+evaluate(model, X_test, y_test)
+```
+
+
+
+
+<div>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Accuracy</th>
+      <th>Precision</th>
+      <th>Recall</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.907306</td>
+      <td>0.769231</td>
+      <td>0.144578</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+**ROC-AUC**
+
+Receiver Operating Characteristic(ROC) curve is a plot of the true positive rate against the false positive rate. It shows the tradeoff between sensitivity
+and specificity.
+
+
+```python
+def calculate_roc_auc(model_, X_test_, y_test_):
+    """
+    Evaluate the roc-auc score
+    """
+    # Get the model predictions
+    # We are using the prediction for the class 1 -> churn
+    prediction_test_ = model_.predict_proba(X_test_)[:,1] 
+    
+    # Compute roc-auc
+    fpr, tpr, thresholds = metrics.roc_curve(y_test_, prediction_test_)
+
+    # Print the evaluation metrics as pandas dataframe
+    score = pd.DataFrame({"ROC-AUC" : [metrics.auc(fpr, tpr)]}) 
+   
+    return fpr, tpr, score
+```
+
+
+```python
+def plot_roc_auc(fpr,tpr): 
+    """
+    Plot the Receiver Operating Characteristic from a list
+    of true positive rates and false positive rates.
+    """
+    # Initialize plot
+    f, ax = plt.subplots(figsize=(14,8)) # Plot ROC
+    
+    # Plot ROC
+    roc_auc = metrics.auc(fpr, tpr) 
+    ax.plot(fpr, tpr, lw=2, alpha=0.3, label="AUC = %0.2f" % (roc_auc)) 
+
+    # Plot the random line.
+    plt.plot([0, 1], [0, 1], linestyle='--', lw=3, color='r', label="Random", alpha=.8)
+  
+    # Fine tune and show the plot.
+    ax.set_xlim([-0.05, 1.05]) 
+    ax.set_ylim([-0.05, 1.05]) 
+    ax.set_xlabel("False Positive Rate (FPR)") 
+    ax.set_ylabel("True Positive Rate (TPR)") 
+    ax.set_title("ROC-AUC") 
+    ax.legend(loc="lower right")
+    plt.show()
+```
+
+
+```python
+fpr, tpr, auc_score = calculate_roc_auc(model, X_test, y_test)
+```
+
+
+```python
+auc_score
+```
+
+
+
+
+<div>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ROC-AUC</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>0.684637</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+plot_roc_auc(fpr, tpr)
+plt.show()
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/model-evaluation/output_32_0.png)
+
+
+**Stratified K-fold validation**
+
+
+```python
+def plot_roc_curve(fprs, tprs): 
+    """ 
+    Plot the Receiver Operating Characteristic from a list of true positive rates and false positive rates. 
+    """ 
+    # Initialize useful lists + the plot axes. 
+    tprs_interp = [] 
+    aucs = [] 
+    mean_fpr = np.linspace(0, 1, 100) 
+    f, ax = plt.subplots(figsize=(18,10))
+    # Plot ROC for each K-Fold + compute AUC scores. 
+    for i, (fpr, tpr) in enumerate(zip(fprs, tprs)): 
+        tprs_interp.append(np.interp(mean_fpr, fpr, tpr)) 
+        tprs_interp[-1][0] = 0.0 
+        roc_auc = metrics.auc(fpr, tpr) 
+        aucs.append(roc_auc) 
+        ax.plot(fpr, tpr, lw=2, alpha=0.3, 
+        label="ROC fold %d (AUC = %0.2f)" % (i, roc_auc)) 
+
+    # Plot the luck line. 
+    plt.plot([0, 1], [0, 1], linestyle='--', lw=3, color='r',
+              label="Random", alpha=.8) 
+    
+    # Plot the mean ROC. 
+    mean_tpr = np.mean(tprs_interp, axis=0) 
+    mean_tpr[-1] = 1.0 
+    mean_auc = metrics.auc(mean_fpr, mean_tpr) 
+    std_auc = np.std(aucs)
+    ax.plot(mean_fpr, mean_tpr, color='b', 
+            label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc), 
+            lw=4, alpha=.8) 
+    
+    # Plot the standard deviation around the mean ROC. 
+    std_tpr = np.std(tprs_interp, axis=0) 
+    tprs_upper = np.minimum(mean_tpr + std_tpr, 1) 
+    tprs_lower = np.maximum(mean_tpr - std_tpr, 0) 
+    ax.fill_between(mean_fpr, tprs_lower, tprs_upper, color="grey", alpha=.2,
+                    label=r"$\pm$ 1 std. dev.")
+    
+    # Fine tune and show the plot. 
+    ax.set_xlim([-0.05, 1.05]) 
+    ax.set_ylim([-0.05, 1.05]) 
+    ax.set_xlabel("False Positive Rate (FPR)") 
+    ax.set_ylabel("True Positive Rate (TPR)") 
+    ax.set_title("ROC-AUC") 
+    ax.legend(loc="lower right") 
+    plt.show() 
+    return (f, ax)
+def compute_roc_auc(model_, index): 
+    y_predict = model_.predict_proba(X.iloc[index])[:,1] 
+    fpr, tpr, thresholds = metrics.roc_curve(y.iloc[index], y_predict) 
+    auc_score = metrics.auc(fpr, tpr) 
+    return fpr, tpr, auc_score
+```
+
+
+```python
+cv = StratifiedKFold(n_splits=5, random_state=13, shuffle=True)
+fprs, tprs, scores = [], [], []
+```
+
+
+```python
+for (train, test), i in zip(cv.split(X, y), range(5)): 
+    model.fit(X.iloc[train], y.iloc[train]) 
+    _, _, auc_score_train = compute_roc_auc(model, train) 
+    fpr, tpr, auc_score = compute_roc_auc(model, test) 
+    scores.append((auc_score_train, auc_score)) 
+    fprs.append(fpr) 
+    tprs.append(tpr)
+```
+
+
+```python
+plot_roc_curve(fprs, tprs)
+plt.show()
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/model-evaluation/output_37_0.png)
+
+
+## 6. Model finetuning
+
+**Random search cross validation**
+
+
+```python
+from sklearn.model_selection import RandomizedSearchCV
+```
+
+
+```python
+# Create the random grid
+params = {
+        'min_child_weight': [i for i in np.arange(1,15,1)], 
+        'gamma': [i for i in np.arange(0,6,0.5)], 
+        'subsample': [i for i in np.arange(0,1.1,0.1)], 
+        'colsample_bytree': [i for i in np.arange(0,1.1,0.1)], 
+        'max_depth': [i for i in np.arange(1,15,1)], 
+        'scale_pos_weight':[i for i in np.arange(1,15,1)], 
+        'learning_rate': [i for i in np.arange(0,0.15,0.01)], 
+        'n_estimators' : [i for i in np.arange(0,2000,100)]}
+
+```
+
+We will create a new base mode.
+
+
+```python
+xg = xgb.XGBClassifier(objective='binary:logistic', 
+                       silent=True, nthread=1)
+```
+
+
+```python
+# Random search of parameters, using 5
+xg_random = RandomizedSearchCV(xg, param_distributions=params, 
+                               n_iter=1, scoring= "roc_auc", 
+                               n_jobs=4, cv=5, verbose=3, random_state=1001)
+# Fit the random search model
+xg_random.fit(X_train, y_train)
+
+```
+
+    Fitting 5 folds for each of 1 candidates, totalling 5 fits
+    
+
+    [Parallel(n_jobs=4)]: Using backend LokyBackend with 4 concurrent workers.
+    [Parallel(n_jobs=4)]: Done   2 out of   5 | elapsed:    6.8s remaining:   10.2s
+    [Parallel(n_jobs=4)]: Done   5 out of   5 | elapsed:    8.3s finished
+    
+
+
+
+
+    RandomizedSearchCV(cv=5, error_score=nan,
+                       estimator=XGBClassifier(base_score=0.5, booster='gbtree',
+                                               colsample_bylevel=1,
+                                               colsample_bynode=1,
+                                               colsample_bytree=1, gamma=0,
+                                               learning_rate=0.1, max_delta_step=0,
+                                               max_depth=3, min_child_weight=1,
+                                               missing=None, n_estimators=100,
+                                               n_jobs=1, nthread=1,
+                                               objective='binary:logistic',
+                                               random_state=0, reg_alpha=0,
+                                               reg_lambda=1, scale...
+                                            'n_estimators': [0, 100, 200, 300, 400,
+                                                             500, 600, 700, 800,
+                                                             900, 1000, 1100, 1200,
+                                                             1300, 1400, 1500, 1600,
+                                                             1700, 1800, 1900],
+                                            'scale_pos_weight': [1, 2, 3, 4, 5, 6,
+                                                                 7, 8, 9, 10, 11,
+                                                                 12, 13, 14],
+                                            'subsample': [0.0, 0.1, 0.2,
+                                                          0.30000000000000004, 0.4,
+                                                          0.5, 0.6000000000000001,
+                                                          0.7000000000000001, 0.8,
+                                                          0.9, 1.0]},
+                       pre_dispatch='2*n_jobs', random_state=1001, refit=True,
+                       return_train_score=False, scoring='roc_auc', verbose=3)
+
+
+
+
+```python
+best_random = xg_random.best_params_
+best_random = {'subsample': 0.8,
+  'scale_pos_weight': 1, 
+  'n_estimators': 1100, 
+  'min_child_weight': 1, 
+  'max_depth': 12, 
+  'learning_rate': 0.01, 
+  'gamma': 4.0, 
+  'colsample_bytree': 0.60}
+
+```
+
+
+```python
+# Create a model with the parameters found
+model_random = xgb.XGBClassifier(objective='binary:logistic', 
+                        silent=True, nthread=1, **best_random)
+fprs, tprs, scores = [], [], []
+```
+
+
+```python
+for (train, test), i in zip(cv.split(X, y), range(5)): 
+    model_random.fit(X.iloc[train], y.iloc[train]) 
+    _, _, auc_score_train = compute_roc_auc(model_random, train) 
+    fpr, tpr, auc_score = compute_roc_auc(model_random, test) 
+    scores.append((auc_score_train, auc_score)) 
+    fprs.append(fpr) 
+    tprs.append(tpr)
+
+```
+
+
+```python
+plot_roc_curve(fprs,tprs)
+plt.show()
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/model-evaluation/output_48_0.png)
+
+
+**Grid search with cross validation (calculating over weekend, then make smaller)**
+
+
+```python
+from sklearn.model_selection import GridSearchCV
+```
+
+
+```python
+# Create the parameter grid based on the results of random search 
+param_grid = {'subsample': [0.7],
+              'scale_pos_weight': [1], 
+              'n_estimators': [1100], 
+              'min_child_weight': [1], 
+              'max_depth': [12, 13, 14], 
+              'learning_rate': [0.005, 0.01], 
+              'gamma': [4.0], 
+              'colsample_bytree': [0.6]}
+
+```
+
+
+```python
+# Create model
+xg = xgb.XGBClassifier(objective='binary:logistic', 
+                       silent=True, nthread=1)
+```
+
+
+```python
+# Instantiate the grid search model
+grid_search = GridSearchCV(estimator = xg, param_grid = param_grid, 
+                            cv = 5, n_jobs = -1, verbose = 2, scoring = "roc_auc")
+```
+
+
+```python
+# Fit the grid search to the data
+grid_search.fit(X_train,y_train)
+```
+
+    Fitting 5 folds for each of 6 candidates, totalling 30 fits
+    
+
+    [Parallel(n_jobs=-1)]: Using backend LokyBackend with 2 concurrent workers.
+    [Parallel(n_jobs=-1)]: Done  30 out of  30 | elapsed: 23.2min finished
+    
+
+
+
+
+    GridSearchCV(cv=5, error_score=nan,
+                 estimator=XGBClassifier(base_score=0.5, booster='gbtree',
+                                         colsample_bylevel=1, colsample_bynode=1,
+                                         colsample_bytree=1, gamma=0,
+                                         learning_rate=0.1, max_delta_step=0,
+                                         max_depth=3, min_child_weight=1,
+                                         missing=None, n_estimators=100, n_jobs=1,
+                                         nthread=1, objective='binary:logistic',
+                                         random_state=0, reg_alpha=0, reg_lambda=1,
+                                         scale_pos_w...ed=None, silent=True,
+                                         subsample=1, verbosity=1),
+                 iid='deprecated', n_jobs=-1,
+                 param_grid={'colsample_bytree': [0.6], 'gamma': [4.0],
+                             'learning_rate': [0.005, 0.01],
+                             'max_depth': [12, 13, 14], 'min_child_weight': [1],
+                             'n_estimators': [1100], 'scale_pos_weight': [1],
+                             'subsample': [0.7]},
+                 pre_dispatch='2*n_jobs', refit=True, return_train_score=False,
+                 scoring='roc_auc', verbose=2)
+
+
+
+
+```python
+best_grid = grid_search.best_params_
+best_grid
+```
+
+
+
+
+    {'colsample_bytree': 0.6,
+     'gamma': 4.0,
+     'learning_rate': 0.005,
+     'max_depth': 12,
+     'min_child_weight': 1,
+     'n_estimators': 1100,
+     'scale_pos_weight': 1,
+     'subsample': 0.7}
+
+
+
+
+```python
+# Create a model with the parameters found
+model_grid = xgb.XGBClassifier(objective='binary:logistic', 
+                               silent=True, nthread=1, **best_grid)
+fprs, tprs, scores = [], [], []
+
+```
+
+
+```python
+for (train, test), i in zip(cv.split(X, y), range(5)):
+    model_grid.fit(X.iloc[train], y.iloc[train])
+    _, _, auc_score_train = compute_roc_auc(model_grid, train)
+    fpr, tpr, auc_score = compute_roc_auc(model_grid, test)
+    scores.append((auc_score_train, auc_score))
+    fprs.append(fpr)
+    tprs.append(tpr)
+```
+
+
+```python
+plot_roc_curve(fprs, tprs)
+plt.show()
+```
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/model-evaluation/output_58_0.png)
+
+
+## 7. Understanding the model
+
+
+**Feature importance**
+
+One simple way of boserving the feature importance is through counting the number of times each feature is split on across all boosting rounds (trees) in the model, and then visualizing the result as a bar graph, with the features ordered according to how many times they appear.
+
+
+```python
+fig, ax = plt.subplots(figsize=(15,20))
+xgb.plot_importance(model_grid, ax=ax)
+```
+
+
+
+
+    <matplotlib.axes._subplots.AxesSubplot at 0x7f8c0ad7f210>
+
+
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/model-evaluation/output_62_1.png)
+
+
+In the feature importance graph above we can see that cons_12m and some other are the features that appear the most in our model and we could infere that these two features have a significant importnace in our model.
+
+**Partial dependence plot**
+
+
+```python
+from sklearn.inspection import plot_partial_dependence
+```
+
+
+```python
+# Create a model with the parameters found
+model_grid_v2 = xgb.XGBClassifier(objective='binary:logistic',
+                                  silent=True, nthread=1, **best_grid)
+model_grid_v2.fit(X_train.values,y_train.values)
+```
+
+
+
+
+    XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
+                  colsample_bynode=1, colsample_bytree=0.6, gamma=4.0,
+                  learning_rate=0.005, max_delta_step=0, max_depth=12,
+                  min_child_weight=1, missing=None, n_estimators=1100, n_jobs=1,
+                  nthread=1, objective='binary:logistic', random_state=0,
+                  reg_alpha=0, reg_lambda=1, scale_pos_weight=1, seed=None,
+                  silent=True, subsample=0.7, verbosity=1)
+
+
+
+
+```python
+fig = plt.figure(figsize=(15,15))
+plot_partial_dependence(model_grid_v2, X_test.values, features=[16, 49], 
+                        feature_names=X_test.columns.tolist(), fig=fig)
+```
+
+    /usr/local/lib/python3.7/dist-packages/sklearn/inspection/_partial_dependence.py:715: FutureWarning: The fig parameter is deprecated in version 0.22 and will be removed in version 0.24
+      FutureWarning)
+    
+
+
+
+
+    <sklearn.inspection._partial_dependence.PartialDependenceDisplay at 0x7f8c0aeb9890>
+
+
+
+
+![png](https://github.com/waldysetio/customer-churn/blob/main/images/model-evaluation/output_67_2.png)
+
+
+tenure
+
+The overall trend is unchaged as compared to our previous models. We can see the trend spikes at slighly different times of the tenure ( 6y ) but then it goes down again and bottoms around 10 years. Then, it starts recovering a bit.
+
+mean_year_price_p2
+
+In our previous models, we saw a sort of "stairshape", in this case we see the pdp is almost flat with some spikes on the extreme values, which hints us that the variable mean_year_price_p2 is not very relevant in this model.
